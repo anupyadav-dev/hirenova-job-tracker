@@ -26,3 +26,30 @@ Roles:
 - User
 - Recruiter
 - Admin
+
+## Backend Folder Structure
+
+src
+├── config
+├── controllers
+├── middleware
+├── models
+├── routes
+├── services
+├── utils
+└── app.js
+
+server.js
+.env
+package.json
+
+## Backend Setup
+
+Backend built using Node.js and Express.
+
+Features:
+
+- Express server
+- MongoDB connection using Mongoose
+- Environment variables
+- Logging middleware

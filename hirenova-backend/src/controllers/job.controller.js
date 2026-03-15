@@ -36,3 +36,12 @@ exports.deleteJob = asyncHandler(async (req, res) => {
     message: "Job deleted",
   });
 });
+
+exports.getJobs = asyncHandler(async (req, res) => {
+  const result = await jobService.getAllJobs(req.query);
+
+  res.json({
+    success: true,
+    ...result,
+  });
+});

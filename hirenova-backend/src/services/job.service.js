@@ -9,10 +9,6 @@ exports.createJob = async (jobData, userId) => {
   return job;
 };
 
-exports.getJobs = async () => {
-  return await Job.find().populate("createdBy", "name email");
-};
-
 exports.getJobById = async (jobId) => {
   return await Job.findById(jobId).populate("createdBy", "name");
 };

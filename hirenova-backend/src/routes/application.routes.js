@@ -25,4 +25,11 @@ router.get(
   applicationController.getApplicants
 );
 
+router.patch(
+  "/:applicationId/status",
+  protect,
+  authorize("recruiter"),
+  applicationController.updateApplicationStatus
+);
+
 module.exports = router;

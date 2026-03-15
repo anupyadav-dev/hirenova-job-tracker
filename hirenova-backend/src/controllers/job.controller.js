@@ -11,11 +11,11 @@ exports.createJob = asyncHandler(async (req, res) => {
 });
 
 exports.getJobs = asyncHandler(async (req, res) => {
-  const jobs = await jobService.getJobs();
+  const result = await jobService.getAllJobs(req.query);
 
   res.json({
     success: true,
-    jobs,
+    ...result,
   });
 });
 
@@ -34,14 +34,5 @@ exports.deleteJob = asyncHandler(async (req, res) => {
   res.json({
     success: true,
     message: "Job deleted",
-  });
-});
-
-exports.getJobs = asyncHandler(async (req, res) => {
-  const result = await jobService.getAllJobs(req.query);
-
-  res.json({
-    success: true,
-    ...result,
   });
 });

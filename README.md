@@ -1,55 +1,164 @@
-# hirenova-job-tracker
+# HireNova 🚀
 
-HireNova is a full-stack job tracker platform where users can track job applications, recruiters can post jobs, and admins can manage the system.
+HireNova is a Job Tracker Platform built using the MERN stack.  
+It allows job seekers to find and apply for jobs, while recruiters can create and manage job postings.
 
-Tech Stack:
+This project is being built step-by-step following production-level backend architecture.
+
+---
+
+## Tech Stack
+
+Frontend (Coming Soon)
 
 - React
+
+Backend
+
 - Node.js
-- Express
+- Express.js
 - MongoDB
+- JWT Authentication
 
-## System Architecture
+Tools
 
-HireNova follows a REST-based architecture.
+- Postman
+- Git & GitHub
 
-Entities:
+---
 
-- Users
-- Companies
-- Jobs
-- Applications
-- Saved Jobs
+## Backend Architecture
 
-Roles:
+The backend follows a layered architecture:
 
-- User
-- Recruiter
-- Admin
+Route → Controller → Service → Model → MongoDB
 
-## Backend Folder Structure
+This separation keeps the code scalable and maintainable.
+
+Project structure:
 
 src
-├── config
-├── controllers
-├── middleware
-├── models
-├── routes
-├── services
-├── utils
-└── app.js
+controllers  
+services  
+models  
+routes  
+middleware  
+utils  
+config
 
-server.js
-.env
-package.json
+---
 
-## Backend Setup
+## Features Implemented
 
-Backend built using Node.js and Express.
+### Authentication Module
 
-Features:
+- User Registration
+- User Login
+- Password hashing
+- JWT Authentication
+- Role-based authorization
 
-- Express server
-- MongoDB connection using Mongoose
-- Environment variables
-- Logging middleware
+Roles supported:
+
+- user (Job seeker)
+- recruiter
+- admin
+
+---
+
+### Job Module
+
+Recruiters can:
+
+- Create jobs
+- Delete jobs
+
+Users can:
+
+- View all jobs
+- View job details
+
+---
+
+### Application Module
+
+Users can:
+
+- Apply for jobs
+- View their job applications
+
+Recruiters can:
+
+- View applicants for a job
+
+---
+
+## Database Design
+
+User
+↓
+Job
+↓
+Application
+
+User → creates → Job  
+User → applies → Job through Application
+
+---
+
+## API Endpoints
+
+### Auth APIs
+
+POST /api/auth/register  
+POST /api/auth/login
+
+---
+
+### Job APIs
+
+GET /api/jobs  
+GET /api/jobs/:id  
+POST /api/jobs  
+DELETE /api/jobs/:id
+
+---
+
+### Application APIs
+
+POST /api/applications/apply/:jobId  
+GET /api/applications/my-applications  
+GET /api/applications/job/:jobId
+
+---
+
+## Project Status
+
+Current Phase:
+Backend Development
+
+Completed Modules:
+Auth Module  
+Job Module  
+Application Module
+
+---
+
+## Upcoming Features
+
+- Job search
+- Job filtering
+- Pagination
+- Dashboard statistics
+- React frontend
+- Deployment
+
+---
+
+## Author
+
+Anup Yadav  
+Full Stack Developer (MERN)
+
+LinkedIn: (your linkedin link)
+GitHub: (your github link)

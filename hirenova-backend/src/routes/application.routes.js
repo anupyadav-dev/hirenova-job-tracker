@@ -11,4 +11,11 @@ router.post(
   applicationController.applyJob
 );
 
+router.get(
+  "/my-applications",
+  protect,
+  authorize("user"),
+  applicationController.getMyApplications
+);
+
 module.exports = router;

@@ -12,3 +12,12 @@ exports.applyJob = asyncHandler(async (req, res) => {
     application,
   });
 });
+
+exports.getMyApplications = asyncHandler(async (req, res) => {
+  const apps = await applicationService.getMyApplications(req.user._id);
+
+  res.json({
+    success: true,
+    applications: apps,
+  });
+});

@@ -1,37 +1,65 @@
 const jwt = require("jsonwebtoken");
-const asyncHandler = require("../utils/asyncHandler.util");
 const User = require("../models/user.model");
 
-// Protect routes (authentication)
-exports.protect = asyncHandler(async (req, res, next) => {
+// Protect Routes
+exports.protect = async (req, res, next) => {
   try {
-    const authHeader = req.headers.authorization;
+    let token;
 
-    if (!authHeader || !authHeader.startsWith("Bearer")) {
-      res.status(401);
-      throw new Error("Not authorized, token missing");
+    if (
+      req.headers.authorization &&
+      req.headers.authorization.startsWith("Bearer")
+    ) {
+      token = req.headers.authorization.split(" ")[1];
     }
 
-    const token = authHeader.split(" ")[1];
+    if (!token) {
+      return res.status(401).json({
+        success: false,
+        message: "Not authorized, token missing",
+      });
+    }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    req.user = await User.findById(decoded.id).select("-password");
+    const user = await User.findById(decoded.id);
+
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    //  Blocked user check
+    if (user.status === "blocked") {
+      return res.status(403).json({
+        success: false,
+        message: "Your account has been blocked",
+      });
+    }
+
+    req.user = user;
 
     next();
   } catch (error) {
-    res.status(401);
-    throw new Error("Not authorized, token invalid");
+    return res.status(401).json({
+      success: false,
+      message: "Invalid token",
+    });
   }
-});
+};
 
-// Role-based access
+// Role-based authorization
 exports.authorize = (...roles) => {
   return (req, res, next) => {
     if (!roles.includes(req.user.role)) {
-      res.status(403);
-      throw new Error("User role not authorized");
+      return res.status(403).json({
+        success: false,
+        message: `Role (${req.user.role}) is not allowed to access this resource`,
+      });
     }
+
     next();
   };
 };

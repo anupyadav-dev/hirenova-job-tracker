@@ -19,4 +19,11 @@ router.patch(
   adminController.getAllUsers
 );
 
+router.get(
+  "/dashboard",
+  protect,
+  authorize("admin"),
+  adminController.getAdminDashboard
+);
+
 module.exports = router;

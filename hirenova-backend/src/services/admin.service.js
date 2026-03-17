@@ -23,3 +23,17 @@ exports.updateUserStatus = async (userId, status) => {
 
   return user;
 };
+
+exports.getAdminDashboard = async () => {
+  const totalUsers = await User.countDocuments({ role: "user" });
+  const totalRecruiters = await User.countDocuments({ role: "recruiter" });
+  const totalJobs = await Job.countDocuments();
+  const totalApplications = await Application.countDocuments();
+
+  return {
+    totalUsers,
+    totalRecruiters,
+    totalJobs,
+    totalApplications,
+  };
+};

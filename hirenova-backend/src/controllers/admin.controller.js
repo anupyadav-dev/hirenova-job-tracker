@@ -31,3 +31,12 @@ exports.updateUserStatus = asyncHandler(async (req, res) => {
     user,
   });
 });
+
+exports.getAdminDashboard = asyncHandler(async (req, res) => {
+  const data = await adminService.getAdminDashboard();
+
+  res.status(200).json({
+    success: true,
+    data,
+  });
+});

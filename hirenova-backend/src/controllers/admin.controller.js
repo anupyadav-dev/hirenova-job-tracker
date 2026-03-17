@@ -9,3 +9,12 @@ exports.getAllUsers = asyncHandler(async (req, res) => {
     users,
   });
 });
+
+exports.getAllRecruiters = asyncHandler(async (req, res) => {
+  const recruiters = await adminService.getAllRecruiters();
+
+  res.status(200).json({
+    success: true,
+    recruiters,
+  });
+});

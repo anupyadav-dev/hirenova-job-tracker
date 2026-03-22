@@ -9,6 +9,7 @@ const Login = () => {
     email: "",
     password: "",
   });
+  const [errors, setErrors] = useState({});
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -17,24 +18,29 @@ const Login = () => {
 
   return (
     <div className="flex justify-center items-center h-screen">
-      <form onSubmit={handleSubmit} className="p-6 shadow-lg rounded w-80">
-        <h2 className="text-xl mb-4">Login</h2>
+      <form
+        onSubmit={handleSubmit}
+        className="p-12 shadow-xl rounded-2xl w-[400px] min-h-[450px] bg-white flex flex-col justify-center space-y-5"
+      >
+        <h2 className="text-2xl font-semibold text-center">Login</h2>
 
         <input
           type="email"
           placeholder="Email"
-          className="w-full mb-3 p-2 border"
+          className="w-full p-3 border rounded-lg"
           onChange={(e) => setForm({ ...form, email: e.target.value })}
         />
 
         <input
           type="password"
           placeholder="Password"
-          className="w-full mb-3 p-2 border"
+          className="w-full p-3 border rounded-lg"
           onChange={(e) => setForm({ ...form, password: e.target.value })}
         />
 
-        <button className="bg-blue-500 text-white w-full p-2">Login</button>
+        <button className="bg-blue-500 text-white w-full p-3 rounded-lg">
+          Login
+        </button>
       </form>
     </div>
   );

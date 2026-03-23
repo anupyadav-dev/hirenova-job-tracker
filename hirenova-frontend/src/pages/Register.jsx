@@ -29,6 +29,7 @@ const Register = () => {
 
         <input
           placeholder="Name"
+          name={form.name}
           className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"
           onChange={(e) => setForm({ ...form, name: e.target.value })}
         />
@@ -36,12 +37,14 @@ const Register = () => {
         <input
           type="email"
           placeholder="Email"
+          name={form.email}
           className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"
           onChange={(e) => setForm({ ...form, email: e.target.value })}
         />
 
         <input
           type="password"
+          name={form.password}
           placeholder="Password"
           className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"
           onChange={(e) => setForm({ ...form, password: e.target.value })}

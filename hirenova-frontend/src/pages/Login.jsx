@@ -9,7 +9,6 @@ const Login = () => {
     email: "",
     password: "",
   });
-  const [errors, setErrors] = useState({});
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -27,6 +26,7 @@ const Login = () => {
         <input
           type="email"
           placeholder="Email"
+          name={form.email}
           className="w-full p-3 border rounded-lg"
           onChange={(e) => setForm({ ...form, email: e.target.value })}
         />
@@ -34,6 +34,7 @@ const Login = () => {
         <input
           type="password"
           placeholder="Password"
+          name={form.password}
           className="w-full p-3 border rounded-lg"
           onChange={(e) => setForm({ ...form, password: e.target.value })}
         />

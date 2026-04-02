@@ -79,6 +79,14 @@ function App() {
           }
         />
       </Routes>
+      <Route
+        path="/admin/dashboard"
+        element={
+          <ProtectedRoute role="admin">
+            <AdminDashboard />
+          </ProtectedRoute>
+        }
+      />
     </BrowserRouter>
   );
 }

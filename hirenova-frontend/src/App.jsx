@@ -10,10 +10,15 @@ import CreateJob from "./pages/CreateJob";
 import MyJobs from "./pages/MyJobs";
 import Applicants from "./pages/Applicants";
 import RecruiterDashboard from "./pages/RecruiterDashboard";
+import AdminDashboard from "./pages/AdminDashboard";
+import AllJobs from "./pages/AllJobs";
+import AllUsers from "./pages/AllUsers";
+import Navbar from "./components/Navbar";
 
 function App() {
   return (
     <BrowserRouter>
+      <Navbar />
       <Routes>
         <Route
           path="/"
@@ -78,32 +83,31 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/admin/dashboard"
+          element={
+            <ProtectedRoute role="admin">
+              <AdminDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/users"
+          element={
+            <ProtectedRoute role="admin">
+              <AllUsers />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/jobs"
+          element={
+            <ProtectedRoute role="admin">
+              <AllJobs />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
-      <Route
-        path="/admin/dashboard"
-        element={
-          <ProtectedRoute role="admin">
-            <AdminDashboard />
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
-        path="/admin/users"
-        element={
-          <ProtectedRoute role="admin">
-            <AllUsers />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/admin/jobs"
-        element={
-          <ProtectedRoute role="admin">
-            <AllJobs />
-          </ProtectedRoute>
-        }
-      />
     </BrowserRouter>
   );
 }

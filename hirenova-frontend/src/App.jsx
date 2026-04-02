@@ -96,6 +96,14 @@ function App() {
           </ProtectedRoute>
         }
       />
+      <Route
+        path="/admin/jobs"
+        element={
+          <ProtectedRoute role="admin">
+            <AllJobs />
+          </ProtectedRoute>
+        }
+      />
     </BrowserRouter>
   );
 }

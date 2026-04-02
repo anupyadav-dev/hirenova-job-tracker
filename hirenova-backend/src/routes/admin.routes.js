@@ -13,6 +13,12 @@ router.get(
   adminController.getAllRecruiters
 );
 
+router.delete(
+  "/jobs/:id",
+  protect,
+  authorize("admin"),
+  adminController.deleteJob
+);
 router.patch(
   "/users/:userId/status",
   protect,

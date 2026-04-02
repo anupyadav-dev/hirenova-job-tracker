@@ -7,7 +7,7 @@ exports.getAllUsers = asyncHandler(async (req, res) => {
   res.status(200).json({
     success: true,
     users,
-  }); 
+  });
 });
 
 exports.getAllJobs = asyncHandler(async (req, res) => {
@@ -15,6 +15,16 @@ exports.getAllJobs = asyncHandler(async (req, res) => {
   res.status(200).json({
     success: true,
     jobs,
+  });
+});
+
+exports.deleteJob = asyncHandler(async (req, res) => {
+  const { jobId } = req.params;
+  await adminService.deleteJob(jobId);
+
+  res.json({
+    success: true,
+    message: "Job deleted by admin",
   });
 });
 

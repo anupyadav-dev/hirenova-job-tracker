@@ -7,6 +7,14 @@ exports.getAllUsers = asyncHandler(async (req, res) => {
   res.status(200).json({
     success: true,
     users,
+  }); 
+});
+
+exports.getAllJobs = asyncHandler(async (req, res) => {
+  const jobs = await adminService.getAllJobs();
+  res.status(200).json({
+    success: true,
+    jobs,
   });
 });
 

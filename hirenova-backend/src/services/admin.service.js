@@ -10,6 +10,10 @@ exports.getAllRecruiters = async () => {
   return await User.find({ role: "recruiter" }).select("-password");
 };
 
+exports.getAllJobs=async ()=>{
+  return await Job.find().populate("createdBy", "name email");
+}
+
 exports.updateUserStatus = async (userId, status) => {
   const user = await User.findById(userId);
 

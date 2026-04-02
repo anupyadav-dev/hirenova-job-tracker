@@ -5,6 +5,7 @@ const adminController = require("../controllers/admin.controller");
 const { protect, authorize } = require("../middleware/auth.middleware");
 
 router.get("/users", protect, authorize("admin"), adminController.getAllUsers);
+router.get("/jobs", protect, authorize("admin"), adminController.getAllJobs);
 router.get(
   "/recruiters",
   protect,

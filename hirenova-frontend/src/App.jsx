@@ -1,26 +1,30 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
-import Login from "./pages/Login";
-import Register from "./pages/Register";
-import Jobs from "./pages/Jobs";
-import JobDetails from "./pages/JobDetails";
+import Home from "./pages/public/Home";
+import Login from "./pages/public/Login";
+import Register from "./pages/public/Register";
+import Jobs from "./pages/user/Jobs";
+import JobDetails from "./pages/user/JobDetails";
 import ProtectedRoute from "./routes/ProtectedRoute";
-import MyApplications from "./pages/MyApplications";
-import CreateJob from "./pages/CreateJob";
-import MyJobs from "./pages/MyJobs";
-import Applicants from "./pages/Applicants";
-import RecruiterDashboard from "./pages/RecruiterDashboard";
-import AdminDashboard from "./pages/AdminDashboard";
-import AllJobs from "./pages/AllJobs";
-import AllUsers from "./pages/AllUsers";
-import Navbar from "./components/Navbar";
-import Footer from "./components/Footer";
-import Home from "./pages/Home";
+import MyApplications from "./pages/user/MyApplications";
+import CreateJob from "./pages/recruiter/CreateJob";
+import MyJobs from "./pages/recruiter/MyJobs";
+import Applicants from "./pages/recruiter/Applicants";
+import RecruiterDashboard from "./pages/recruiter/RecruiterDashboard";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import AllJobs from "./pages/admin/AllJobs";
+import AllUsers from "./pages/admin/AllUsers";
+import Navbar from "./components/layout/Navbar";
+import Footer from "./components/layout/Footer";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 
 function App() {
   return (
     <BrowserRouter>
       <Navbar />
+      <ToastContainer position="top-right" autoClose={3000} />
       <Routes>
         <Route
           path="/"

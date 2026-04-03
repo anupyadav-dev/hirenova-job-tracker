@@ -15,6 +15,7 @@ import AllJobs from "./pages/AllJobs";
 import AllUsers from "./pages/AllUsers";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
+import Home from "./pages/Home";
 
 function App() {
   return (
@@ -23,6 +24,15 @@ function App() {
       <Routes>
         <Route
           path="/"
+          element={
+            <ProtectedRoute>
+              <Home />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/jobs"
           element={
             <ProtectedRoute>
               <Jobs />

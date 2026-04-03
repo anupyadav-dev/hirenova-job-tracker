@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import { logout } from "../features/auth/authSlice";
+import { logout } from "../../features/auth/authSlice";
 
 const Navbar = () => {
   const { user } = useSelector((state) => state.auth);
@@ -25,7 +25,7 @@ const Navbar = () => {
         {user?.role === "user" && (
           <>
             <Link to="/">Home</Link>
-            <Link to="/applications">My Applications</Link>
+            <Link to="/my-applications">My Applications</Link>
           </>
         )}
 

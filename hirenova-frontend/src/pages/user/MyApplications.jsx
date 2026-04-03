@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { getMyApplications } from "../features/applications/applicationSlice";
+import { getMyApplications } from "../../features/applications/applicationSlice";
 
 const MyApplications = () => {
   const dispatch = useDispatch();

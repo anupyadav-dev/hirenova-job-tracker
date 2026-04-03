@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { getJobs } from "../features/jobs/jobSlice";
+import { getJobs } from "../../features/jobs/jobSlice";
 import { useNavigate } from "react-router-dom";
 
 const Jobs = () => {

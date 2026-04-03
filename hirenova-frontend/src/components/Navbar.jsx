@@ -6,31 +6,43 @@ const Navbar = () => {
   const { user } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
 
+  const handleLogout = () => {
+    dispatch(logout());
+  };
+
   return (
-    <nav className="flex justify-between p-4 bg-gray-800 text-white">
-      <Link to="/">Hirenova</Link>
+    <nav className="bg-gray-900 text-white px-5 py-3 flex justify-between">
+      <h1 className="font-bold">Hirenova</h1>
 
       <div className="flex gap-4">
+        {!user && (
+          <>
+            <Link to="/login">Login</Link>
+            <Link to="/register">Register</Link>
+          </>
+        )}
+
         {user?.role === "user" && (
           <>
-            <Link to="/">Jobs</Link>
-            <Link to="/my-applications">My Applications</Link>
+            <Link to="/">Home</Link>
+            <Link to="/applications">My Applications</Link>
           </>
         )}
 
         {user?.role === "recruiter" && (
           <>
-            <Link to="/recruiter/dashboard">Dashboard</Link>
+            <Link to="/dashboard">Dashboard</Link>
+            <Link to="/post-job">Post Job</Link>
           </>
         )}
 
         {user?.role === "admin" && (
           <>
-            <Link to="/admin/dashboard">Admin</Link>
+            <Link to="/admin">Admin Panel</Link>
           </>
         )}
 
-        <button onClick={() => dispatch(logout())}>Logout</button>
+        {user && <button onClick={handleLogout}>Logout</button>}
       </div>
     </nav>
   );

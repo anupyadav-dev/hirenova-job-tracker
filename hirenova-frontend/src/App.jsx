@@ -18,7 +18,7 @@ import Navbar from "./components/layout/Navbar";
 import Footer from "./components/layout/Footer";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
->>>>>>> 48f0fb2 (refactor(frontend): reorganize components and pages into modular folder structure)
+
 
 function App() {
   return (
@@ -28,6 +28,15 @@ function App() {
       <Routes>
         <Route
           path="/"
+          element={
+            <ProtectedRoute>
+              <Home />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/jobs"
           element={
             <ProtectedRoute>
               <Jobs />

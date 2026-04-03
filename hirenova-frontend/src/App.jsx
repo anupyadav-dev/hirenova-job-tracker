@@ -14,6 +14,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 import AllJobs from "./pages/AllJobs";
 import AllUsers from "./pages/AllUsers";
 import Navbar from "./components/Navbar";
+import Footer from "./components/Footer";
 
 function App() {
   return (
@@ -108,6 +109,7 @@ function App() {
           }
         />
       </Routes>
+      <Footer />
     </BrowserRouter>
   );
 }

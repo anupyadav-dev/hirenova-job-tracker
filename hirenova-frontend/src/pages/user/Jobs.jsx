@@ -2,10 +2,15 @@ import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { getJobs } from "../../features/jobs/jobSlice";
 import { useNavigate } from "react-router-dom";
+import Loader from "../../components/common/Loader";
+import ErrorState from "../../components/common/ErrorState";
+import EmptyState from "../../components/common/EmptyState";
 
 const Jobs = () => {
   const dispatch = useDispatch();
-  const { jobs, loading, page, pages } = useSelector((state) => state.jobs);
+  const { jobs, loading, page, pages, error } = useSelector(
+    (state) => state.jobs
+  );
 
   const navigate = useNavigate();
 
@@ -19,6 +24,10 @@ const Jobs = () => {
   const handleSearch = () => {
     dispatch(getJobs({ keyword, location, page: 1 }));
   };
+
+  if (loading) return <Loader />;
+  if (error) return <ErrorState message={error} />;
+  if (!jobs.length) return <EmptyState message="No jobs found" />;
 
   return (
     <div className="p-6">

@@ -1,10 +1,13 @@
-import Sidebar from "../components/Sidebar";
+import { Outlet } from "react-router-dom";
+import Sidebar from "../components/layout/Sidebar";
 
-const DashboardLayout = ({ children }) => {
+const DashboardLayout = () => {
   return (
-    <div className="flex">
+    <div style={{ display: "flex" }}>
       <Sidebar />
-      <main className="flex-1 p-5">{children}</main>
+      <div style={{ flex: 1 }}>
+        <Outlet />
+      </div>
     </div>
   );
 };

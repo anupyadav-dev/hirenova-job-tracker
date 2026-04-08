@@ -16,9 +16,9 @@ router.get(
   authorize("user"),
   jobController.getRecommendedJobs
 );
-router.get("/", protect, jobController.getJobs);
+router.get("/", jobController.getJobs);
 
-router.get("/:id", protect, jobController.getJobById);
+router.get("/:id", jobController.getJobById);
 router.delete("/:id", protect, authorize("recruiter"), jobController.deleteJob);
 
 module.exports = router;

@@ -1,7 +1,13 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+
 import { getJobs } from "../../features/jobs/jobSlice";
-import { useNavigate } from "react-router-dom";
+import useDebounce from "../../hooks/useDebounce";
+
+import SearchBar from "../../components/jobs/SearchBar";
+import JobList from "../../components/jobs/JobList";
+import Pagination from "../../components/jobs/Pagination";
+
 import Loader from "../../components/common/Loader";
 import ErrorState from "../../components/common/ErrorState";
 import EmptyState from "../../components/common/EmptyState";
@@ -12,77 +18,44 @@ const Jobs = () => {
     (state) => state.jobs
   );
 
-  const navigate = useNavigate();
-
   const [keyword, setKeyword] = useState("");
   const [location, setLocation] = useState("");
 
+  const debouncedKeyword = useDebounce(keyword, 500);
+
   useEffect(() => {
-    dispatch(getJobs({ keyword, location, page: 1 }));
-  }, []);
+    dispatch(getJobs({ keyword: debouncedKeyword, location, page }));
+  }, [dispatch, debouncedKeyword, location, page]);
 
-  const handleSearch = () => {
-    dispatch(getJobs({ keyword, location, page: 1 }));
-  };
-
-  if (loading) return <Loader />;
   if (error) return <ErrorState message={error} />;
-  if (!jobs.length) return <EmptyState message="No jobs found" />;
 
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-4">Jobs</h1>
 
-      {/* Search */}
-      <div className="flex gap-2 mb-4">
-        <input
-          placeholder="Search job"
-          className="border p-2"
-          onChange={(e) => setKeyword(e.target.value)}
-        />
-        <input
-          placeholder="Location"
-          className="border p-2"
-          onChange={(e) => setLocation(e.target.value)}
-        />
-        <button onClick={handleSearch} className="bg-blue-500 text-white px-4">
-          Search
-        </button>
-      </div>
+      <SearchBar
+        keyword={keyword}
+        setKeyword={setKeyword}
+        location={location}
+        setLocation={setLocation}
+      />
 
-      {/* Jobs */}
       {loading ? (
-        <p>Loading...</p>
+        <Loader />
+      ) : !jobs || jobs.length === 0 ? (
+        <EmptyState message="No jobs found" />
       ) : (
-        <div className="grid gap-4">
-          {jobs.map((job) => (
-            <div
-              key={job._id}
-              className="border p-4 shadow cursor-pointer"
-              onClick={() => navigate(`/jobs/${job._id}`)}
-            >
-              <h2 className="text-lg font-semibold">{job.title}</h2>
-              <p>{job.description}</p>
-              <p className="text-sm text-gray-500">{job.location}</p>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Pagination */}
-      <div className="flex gap-2 mt-4">
-        {[...Array(pages).keys()].map((x) => (
-          <button
-            key={x + 1}
-            onClick={() =>
-              dispatch(getJobs({ keyword, location, page: x + 1 }))
+        <>
+          <JobList jobs={jobs} />
+          <Pagination
+            page={page}
+            pages={pages}
+            onPageChange={(newPage) =>
+              dispatch(getJobs({ keyword, location, page: newPage }))
             }
-            className="border px-3 py-1"
-          >
-            {x + 1}
-          </button>
-        ))}
-      </div>
+          />
+        </>
+      )}
     </div>
   );
 };

@@ -4,13 +4,13 @@ const SearchBar = ({ keyword, setKeyword, location, setLocation }) => {
       <input
         value={keyword}
         placeholder="Search job"
-        className="border p-2"
+        className="border p-2 flex-1"
         onChange={(e) => setKeyword(e.target.value)}
       />
       <input
         value={location}
         placeholder="Location"
-        className="border p-2"
+        className="border p-2 flex-1"
         onChange={(e) => setLocation(e.target.value)}
       />
     </div>

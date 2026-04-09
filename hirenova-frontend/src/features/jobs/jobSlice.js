@@ -3,7 +3,7 @@ import axios from "../../api/axios";
 
 const API = "/jobs";
 
-// === PUBLIC ===
+// ================= PUBLIC =================
 
 // 🔥 Get All Jobs
 export const getJobs = createAsyncThunk(
@@ -20,6 +20,23 @@ export const getJobs = createAsyncThunk(
     } catch (err) {
       return thunkAPI.rejectWithValue(
         err.response?.data?.message || "Failed to fetch jobs"
+      );
+    }
+  }
+);
+
+// ================= RECOMMENDED =================
+
+// 🔥 Get Recommended Jobs
+export const getRecommendedJobs = createAsyncThunk(
+  "jobs/getRecommendedJobs",
+  async (_, thunkAPI) => {
+    try {
+      const res = await axios.get(`${API}/recommended`);
+      return res.data;
+    } catch (err) {
+      return thunkAPI.rejectWithValue(
+        err.response?.data?.message || "Failed to fetch recommended jobs"
       );
     }
   }
@@ -77,23 +94,26 @@ export const deleteJob = createAsyncThunk(
 const jobSlice = createSlice({
   name: "jobs",
   initialState: {
-    // Public jobs
+    // 🌐 Public Jobs
     jobs: [],
     total: 0,
     page: 1,
     pages: 1,
 
-    // Recruiter jobs
+    // 🔥 Recommended Jobs
+    recommendedJobs: [],
+
+    // 🧑‍💼 Recruiter Jobs
     myJobs: [],
 
-    // Common states
+    // ⚙️ Common State
     loading: false,
     error: null,
     success: false,
   },
 
   reducers: {
-    // 🔥 Reset success (use after create job)
+    // 🔄 Reset state (use after create job)
     resetJobState: (state) => {
       state.success = false;
       state.error = null;
@@ -119,7 +139,20 @@ const jobSlice = createSlice({
         state.error = action.payload;
       })
 
-      // ================= GET MY JOBS =================
+      // ================= RECOMMENDED =================
+      .addCase(getRecommendedJobs.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(getRecommendedJobs.fulfilled, (state, action) => {
+        state.loading = false;
+        state.recommendedJobs = action.payload;
+      })
+      .addCase(getRecommendedJobs.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+
+      // ================= MY JOBS =================
       .addCase(getMyJobs.pending, (state) => {
         state.loading = true;
       })
@@ -140,7 +173,7 @@ const jobSlice = createSlice({
         state.loading = false;
         state.success = true;
 
-        // optional: push new job
+        // 🔥 instant UI update
         state.myJobs.unshift(action.payload);
       })
       .addCase(createJob.rejected, (state, action) => {

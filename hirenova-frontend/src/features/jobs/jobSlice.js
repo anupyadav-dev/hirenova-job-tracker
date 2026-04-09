@@ -1,11 +1,14 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "../../api/axios";
 
-const API = "http://localhost:5000/api/jobs";
+const API = "/jobs";
 
+// === PUBLIC ===
+
+// 🔥 Get All Jobs
 export const getJobs = createAsyncThunk(
   "jobs/getJobs",
-  async (params, thunkAPI) => {
+  async (params = {}, thunkAPI) => {
     try {
       const { keyword = "", location = "", page = 1 } = params;
 
@@ -15,24 +18,92 @@ export const getJobs = createAsyncThunk(
 
       return res.data;
     } catch (err) {
-      return thunkAPI.rejectWithValue(err.response.data.message);
+      return thunkAPI.rejectWithValue(
+        err.response?.data?.message || "Failed to fetch jobs"
+      );
     }
   }
 );
 
+// ================= RECRUITER =================
+
+// 🔥 Get My Jobs
+export const getMyJobs = createAsyncThunk(
+  "jobs/getMyJobs",
+  async (_, thunkAPI) => {
+    try {
+      const res = await axios.get(`${API}/my-jobs`);
+      return res.data;
+    } catch (err) {
+      return thunkAPI.rejectWithValue(
+        err.response?.data?.message || "Failed to fetch my jobs"
+      );
+    }
+  }
+);
+
+// 🔥 Create Job
+export const createJob = createAsyncThunk(
+  "jobs/createJob",
+  async (data, thunkAPI) => {
+    try {
+      const res = await axios.post(`${API}`, data);
+      return res.data;
+    } catch (err) {
+      return thunkAPI.rejectWithValue(
+        err.response?.data?.message || "Failed to create job"
+      );
+    }
+  }
+);
+
+// 🔥 Delete Job
+export const deleteJob = createAsyncThunk(
+  "jobs/deleteJob",
+  async (id, thunkAPI) => {
+    try {
+      await axios.delete(`${API}/${id}`);
+      return id;
+    } catch (err) {
+      return thunkAPI.rejectWithValue(
+        err.response?.data?.message || "Failed to delete job"
+      );
+    }
+  }
+);
+
+// ================= SLICE =================
+
 const jobSlice = createSlice({
   name: "jobs",
   initialState: {
+    // Public jobs
     jobs: [],
     total: 0,
     page: 1,
     pages: 1,
+
+    // Recruiter jobs
+    myJobs: [],
+
+    // Common states
     loading: false,
     error: null,
+    success: false,
   },
-  reducers: {},
+
+  reducers: {
+    // 🔥 Reset success (use after create job)
+    resetJobState: (state) => {
+      state.success = false;
+      state.error = null;
+    },
+  },
+
   extraReducers: (builder) => {
     builder
+
+      // ================= PUBLIC =================
       .addCase(getJobs.pending, (state) => {
         state.loading = true;
       })
@@ -46,8 +117,43 @@ const jobSlice = createSlice({
       .addCase(getJobs.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+      })
+
+      // ================= GET MY JOBS =================
+      .addCase(getMyJobs.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(getMyJobs.fulfilled, (state, action) => {
+        state.loading = false;
+        state.myJobs = action.payload;
+      })
+      .addCase(getMyJobs.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+
+      // ================= CREATE JOB =================
+      .addCase(createJob.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(createJob.fulfilled, (state, action) => {
+        state.loading = false;
+        state.success = true;
+
+        // optional: push new job
+        state.myJobs.unshift(action.payload);
+      })
+      .addCase(createJob.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+
+      // ================= DELETE JOB =================
+      .addCase(deleteJob.fulfilled, (state, action) => {
+        state.myJobs = state.myJobs.filter((job) => job._id !== action.payload);
       });
   },
 });
 
+export const { resetJobState } = jobSlice.actions;
 export default jobSlice.reducer;

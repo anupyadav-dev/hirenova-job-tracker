@@ -58,7 +58,7 @@ const AppRoutes = () => {
           />
         </Route>
 
-        {/* DASHBOARD LAYOUT (Recruiter + Admin) */}
+        {/* ================= DASHBOARD (Recruiter + Admin) ================= */}
         <Route
           element={
             <ProtectedRoute>
@@ -67,16 +67,66 @@ const AppRoutes = () => {
           }
         >
           {/* Recruiter */}
-          <Route path="/recruiter/dashboard" element={<RecruiterDashboard />} />
-          <Route path="/recruiter/create-job" element={<CreateJob />} />
-          <Route path="/recruiter/jobs" element={<MyJobs />} />
-          <Route path="/recruiter/applicants/:jobId" element={<Applicants />} />
+          <Route
+            path="recruiter/dashboard"
+            element={
+              <ProtectedRoute role="recruiter">
+                <RecruiterDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="recruiter/create-job"
+            element={
+              <ProtectedRoute role="recruiter">
+                <CreateJob />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="recruiter/jobs"
+            element={
+              <ProtectedRoute role="recruiter">
+                <MyJobs />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="recruiter/applicants/:jobId"
+            element={
+              <ProtectedRoute role="recruiter">
+                <Applicants />
+              </ProtectedRoute>
+            }
+          />
 
           {/* Admin */}
-          <Route path="/admin/dashboard" element={<AdminDashboard />} />
-          <Route path="/admin/users" element={<AllUsers />} />
-          <Route path="/admin/jobs" element={<AllJobs />} />
+          <Route
+            path="admin/dashboard"
+            element={
+              <ProtectedRoute role="admin">
+                <AdminDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="admin/users"
+            element={
+              <ProtectedRoute role="admin">
+                <AllUsers />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="admin/jobs"
+            element={
+              <ProtectedRoute role="admin">
+                <AllJobs />
+              </ProtectedRoute>
+            }
+          />
         </Route>
+        <Route path="*" element={<h1>404 - Page Not Found</h1>} />
       </Routes>
     </BrowserRouter>
   );

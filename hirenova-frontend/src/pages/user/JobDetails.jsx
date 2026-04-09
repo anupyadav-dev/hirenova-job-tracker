@@ -64,7 +64,7 @@ const JobDetails = () => {
       {/* Extra Info */}
       <div className="flex gap-4 text-sm text-gray-600 mb-4">
         {job.salary && <span>💰 {job.salary}</span>}
-        {job.type && <span>📌 {job.type}</span>}
+        {job.type && <span> {job.type}</span>}
       </div>
 
       {/* Apply Button */}

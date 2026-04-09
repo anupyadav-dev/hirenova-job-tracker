@@ -1,18 +1,19 @@
 import { useState } from "react";
 import { useDispatch } from "react-redux";
-import { registerUser } from "../../features/auth/authSlice";
-import { useNavigate } from "react-router-dom";
+import { loginUser } from "../../features/auth/authSlice";
+import { useNavigate, useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
 
-const Register = () => {
+const Login = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const from = location.state?.from || "/";
 
   const [form, setForm] = useState({
-    name: "",
     email: "",
     password: "",
-    role: "user",
   });
 
   const [loading, setLoading] = useState(false);
@@ -20,82 +21,66 @@ const Register = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // 🔥 basic validation
-    if (!form.name || !form.email || !form.password) {
+    if (!form.email || !form.password) {
       return toast.error("All fields are required");
-    }
-
-    if (form.password.length < 6) {
-      return toast.error("Password must be at least 6 characters");
     }
 
     try {
       setLoading(true);
 
-      await dispatch(registerUser(form)).unwrap();
+      const res = await dispatch(loginUser(form)).unwrap();
 
-      toast.success("Account created successfully 🎉");
+      toast.success("Login successful ");
 
-      // 🔥 redirect after register
-      navigate("/login");
+      if (res.user.role === "recruiter") {
+        navigate("/recruiter/dashboard");
+      } else if (res.user.role === "admin") {
+        navigate("/admin/dashboard");
+      } else {
+        navigate(from);
+      }
     } catch (err) {
-      toast.error(typeof err === "string" ? err : "Registration failed");
+      toast.error(err);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-100">
+    <div className="flex justify-center items-center h-screen">
       <form
-        className="p-10 shadow-xl rounded-2xl w-[420px] bg-white space-y-4"
         onSubmit={handleSubmit}
+        className="p-12 shadow-xl rounded-2xl w-[400px] min-h-[450px] bg-white flex flex-col justify-center space-y-5"
       >
-        <h2 className="text-2xl font-semibold text-center">Create Account</h2>
-
-        <input
-          placeholder="Name"
-          value={form.name}
-          className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"
-          onChange={(e) => setForm({ ...form, name: e.target.value })}
-        />
+        <h2 className="text-2xl font-semibold text-center">Login</h2>
 
         <input
           type="email"
           placeholder="Email"
           value={form.email}
-          className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"
+          className="w-full p-3 border rounded-lg"
           onChange={(e) => setForm({ ...form, email: e.target.value })}
         />
 
         <input
           type="password"
           placeholder="Password"
-          value={form.password}
-          className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"
+          va={form.password}
+          className="w-full p-3 border rounded-lg"
           onChange={(e) => setForm({ ...form, password: e.target.value })}
         />
-
-        <select
-          value={form.role}
-          className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"
-          onChange={(e) => setForm({ ...form, role: e.target.value })}
-        >
-          <option value="user">User</option>
-          <option value="recruiter">Recruiter</option>
-        </select>
 
         <button
           disabled={loading}
           className={`w-full p-3 rounded-lg text-white ${
-            loading ? "bg-green-300" : "bg-green-500 hover:bg-green-600"
+            loading ? "bg-blue-300" : "bg-blue-500 hover:bg-blue-600"
           }`}
         >
-          {loading ? "Creating Account..." : "Register"}
+          {loading ? "Logging in..." : "Login"}
         </button>
       </form>
     </div>
   );
 };
 
-export default Register;
+export default Login;

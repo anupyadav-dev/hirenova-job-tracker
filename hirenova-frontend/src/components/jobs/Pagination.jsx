@@ -1,6 +1,6 @@
 const Pagination = ({ page, pages, onPageChange }) => {
   return (
-    <div className="flex gap-2 mt-4">
+    <div className="flex gap-2 mt-6">
       {[...Array(pages).keys()].map((x) => (
         <button
           key={x + 1}

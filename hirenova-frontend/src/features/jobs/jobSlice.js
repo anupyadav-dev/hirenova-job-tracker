@@ -27,7 +27,7 @@ export const getRecommendedJobs = createAsyncThunk(
   "jobs/getRecommendedJobs",
   async (_, thunkAPI) => {
     try {
-      const res = await axios.get(`${API}/recommendations`);
+      const res = await axios.get(`${API}/recommended`);
       return res.data.jobs;
     } catch (err) {
       return thunkAPI.rejectWithValue(

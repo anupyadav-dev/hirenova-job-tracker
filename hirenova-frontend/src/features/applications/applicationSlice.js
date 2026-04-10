@@ -22,7 +22,7 @@ export const getApplicants = createAsyncThunk(
   "applications/getApplicants",
   async (jobId, thunkAPI) => {
     try {
-      const res = await axios.get(`/applications/${jobId}`);
+      const res = await axios.get(`/applications/job/${jobId}`);
       return res.data;
     } catch (err) {
       return thunkAPI.rejectWithValue(

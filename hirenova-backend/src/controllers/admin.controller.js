@@ -19,8 +19,8 @@ exports.getAllJobs = asyncHandler(async (req, res) => {
 });
 
 exports.deleteJob = asyncHandler(async (req, res) => {
-  const { jobId } = req.params;
-  await adminService.deleteJob(jobId);
+  const { id } = req.params;
+  await adminService.deleteJob(id);
 
   res.json({
     success: true,

@@ -24,6 +24,7 @@ import RecruiterDashboard from "../pages/recruiter/RecruiterDashboard";
 import AdminDashboard from "../pages/admin/AdminDashboard";
 import AllJobs from "../pages/admin/AllJobs";
 import AllUsers from "../pages/admin/AllUsers";
+import AllRecruiters from "../pages/admin/AllRecruiters";
 
 // Toast
 import { ToastContainer } from "react-toastify";

@@ -23,7 +23,7 @@ router.patch(
   "/users/:userId/status",
   protect,
   authorize("admin"),
-  adminController.getAllUsers
+  adminController.updateUserStatus
 );
 
 router.get(

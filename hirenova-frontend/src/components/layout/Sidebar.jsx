@@ -83,6 +83,14 @@ const Sidebar = () => {
             >
               Jobs
             </Link>
+            <Link
+              to="/admin/recruiters"
+              className={`block mb-2 p-2 rounded ${isActive(
+                "/admin/recruiters"
+              )}`}
+            >
+              Recruiters
+            </Link>
           </>
         )}
       </div>

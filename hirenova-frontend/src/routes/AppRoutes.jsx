@@ -125,6 +125,14 @@ const AppRoutes = () => {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="admin/recruiters"
+            element={
+              <ProtectedRoute role="admin">
+                <AllRecruiters />
+              </ProtectedRoute>
+            }
+          />
         </Route>
         <Route path="*" element={<h1>404 - Page Not Found</h1>} />
       </Routes>

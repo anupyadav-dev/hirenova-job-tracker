@@ -22,7 +22,7 @@ export const getApplicants = createAsyncThunk(
   "applications/getApplicants",
   async (jobId, thunkAPI) => {
     try {
-      const res = await axios.get(`/applications/${jobId}`);
+      const res = await axios.get(`/applications/job/${jobId}`);
       return res.data;
     } catch (err) {
       return thunkAPI.rejectWithValue(
@@ -37,7 +37,7 @@ export const updateApplicationStatus = createAsyncThunk(
   "applications/updateApplicationStatus",
   async ({ id, status }, thunkAPI) => {
     try {
-      const res = await axios.patch(`/applications/${id}`, { status });
+      const res = await axios.patch(`/applications/${id}/status`, { status });
       return { id, status, data: res.data };
     } catch (err) {
       return thunkAPI.rejectWithValue(
@@ -85,7 +85,7 @@ const applicationSlice = createSlice({
       })
       .addCase(getApplicants.fulfilled, (state, action) => {
         state.loading = false;
-        state.applicants = action.payload;
+        state.applicants = action.payload.applicants || [];
       })
       .addCase(getApplicants.rejected, (state, action) => {
         state.loading = false;

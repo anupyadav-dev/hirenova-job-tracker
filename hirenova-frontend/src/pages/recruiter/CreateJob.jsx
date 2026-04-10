@@ -1,5 +1,8 @@
 import { useState } from "react";
 import axios from "../../api/axios";
+import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
+import Loader from "../../components/common/Loader";
 
 const CreateJob = () => {
   const [form, setForm] = useState({
@@ -8,41 +11,79 @@ const CreateJob = () => {
     location: "",
   });
 
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // 🔹 Basic Validation
+    if (!form.title || !form.description || !form.location) {
+      toast.error("All fields are required");
+      return;
+    }
+
     try {
+      setLoading(true);
       await axios.post("/jobs", form);
-      alert("Job Created!");
+      toast.success("Job Created Successfully!");
+      navigate("/recruiter/jobs"); // redirect to MyJobs
     } catch (err) {
-      alert(err.response?.data?.message);
+      toast.error(err.response?.data?.message || "Something went wrong");
+    } finally {
+      setLoading(false);
     }
   };
-
+  {
+    loading && <Loader />;
+  }
   return (
-    <div className="p-6">
-      <h2>Create Job</h2>
+    <div className="p-6 max-w-2xl mx-auto">
+      <h2 className="text-2xl font-bold mb-4">Create Job</h2>
 
-      <form onSubmit={handleSubmit} className="space-y-3">
+      <form onSubmit={handleSubmit} className="space-y-4">
         <input
+          type="text"
+          name="title"
           placeholder="Title"
-          className="border p-2 w-full"
-          onChange={(e) => setForm({ ...form, title: e.target.value })}
+          value={form.title}
+          onChange={handleChange}
+          className="border p-2 w-full rounded"
         />
 
         <input
+          type="text"
+          name="location"
           placeholder="Location"
-          className="border p-2 w-full"
-          onChange={(e) => setForm({ ...form, location: e.target.value })}
+          value={form.location}
+          onChange={handleChange}
+          className="border p-2 w-full rounded"
         />
 
         <textarea
+          name="description"
           placeholder="Description"
-          className="border p-2 w-full"
-          onChange={(e) => setForm({ ...form, description: e.target.value })}
+          value={form.description}
+          onChange={handleChange}
+          className="border p-2 w-full rounded"
+          rows={5}
         />
 
-        <button className="bg-blue-500 text-white px-4 py-2">Create</button>
+        <button
+          type="submit"
+          className={`px-4 py-2 text-white rounded ${
+            loading
+              ? "bg-blue-300 cursor-not-allowed"
+              : "bg-blue-500 hover:bg-blue-600"
+          }`}
+          disabled={loading}
+        >
+          {loading ? "Creating..." : "Create Job"}
+        </button>
       </form>
     </div>
   );

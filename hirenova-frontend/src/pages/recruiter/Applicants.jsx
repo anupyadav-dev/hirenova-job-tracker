@@ -1,45 +1,61 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
-import axios from "../../api/axios";
+import {
+  getApplicants,
+  updateApplicationStatus,
+} from "../../features/applications/applicationSlice";
+import { toast } from "react-toastify";
+import ApplicantCard from "../../components/applications/ApplicantCard";
+
+// ✅ Reusable components
+import Loader from "../../components/common/Loader";
+import ErrorState from "../../components/common/ErrorState";
+import EmptyState from "../../components/common/EmptyState";
 
 const Applicants = () => {
   const { jobId } = useParams();
-  const [apps, setApps] = useState([]);
-  console.log(apps);
+  const dispatch = useDispatch();
+
+  const { applicants, loading, error } = useSelector(
+    (state) => state.applications
+  );
 
   useEffect(() => {
-    const fetchApplicants = async () => {
-      const res = await axios.get(`/applications/job/${jobId}`);
+    dispatch(getApplicants(jobId));
+  }, [dispatch, jobId]);
 
-      setApps(res.data.applicants);
-    };
-
-    fetchApplicants();
-  }, []);
-
-  const updateStatus = async (id, status) => {
-    await axios.patch(`/applications/${id}/status`, { status });
-
-    alert("Updated!");
+  // 🔥 Update status handler
+  const handleStatus = (id, status) => {
+    dispatch(updateApplicationStatus({ id, status }));
+    toast.success(`Application ${status}`);
   };
+
+  // 🔹 Loading
+  if (loading) return <Loader />;
+
+  // 🔹 Error
+  if (error) return <ErrorState message="Failed to load applicants" />;
+
+  // 🔹 Empty
+  if (!applicants || applicants.length === 0) {
+    return <EmptyState message="No applicants yet" />;
+  }
 
   return (
     <div className="p-6">
-      <h1>Applicants</h1>
+      <h1 className="text-2xl font-bold mb-6">Applicants</h1>
 
-      {apps.map((app) => (
-        <div key={app._id} className="border p-4 mb-3">
-          <p>{app.applicant.name}</p>
-
-          <button onClick={() => updateStatus(app._id, "accepted")}>
-            Accept
-          </button>
-
-          <button onClick={() => updateStatus(app._id, "rejected")}>
-            Reject
-          </button>
-        </div>
-      ))}
+      <div className="grid gap-4">
+        {applicants.map((app) => (
+          <ApplicantCard
+            key={app._id}
+            app={app}
+            onAccept={() => handleStatus(app._id, "accepted")}
+            onReject={() => handleStatus(app._id, "rejected")}
+          />
+        ))}
+      </div>
     </div>
   );
 };

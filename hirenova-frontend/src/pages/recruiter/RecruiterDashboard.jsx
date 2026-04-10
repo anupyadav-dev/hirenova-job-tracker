@@ -9,7 +9,6 @@ const RecruiterDashboard = () => {
   const dispatch = useDispatch();
   const { totalJobs, totalApplications, applicationsPerJob, loading, error } =
     useSelector((state) => state.recruiter);
-console.log(totalJobs, totalApplications, applicationsPerJob)
   useEffect(() => {
     dispatch(getRecruiterDashboard());
   }, [dispatch]);

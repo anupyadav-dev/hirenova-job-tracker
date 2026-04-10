@@ -145,7 +145,7 @@ const jobSlice = createSlice({
       })
       .addCase(getRecommendedJobs.fulfilled, (state, action) => {
         state.loading = false;
-        state.recommendedJobs = action.payload;
+        state.recommendedJobs = action.payload.jobs;
       })
       .addCase(getRecommendedJobs.rejected, (state, action) => {
         state.loading = false;

@@ -11,7 +11,33 @@ exports.deleteJob = async (jobId) => {
 };
 
 exports.getAllRecruiters = async () => {
-  return await User.find({ role: "recruiter" }).select("-password");
+  const recruiters = await User.aggregate([
+    {
+      $match: { role: "recruiter" },
+    },
+    {
+      $lookup: {
+        from: "jobs",
+        localField: "_id",
+        foreignField: "createdBy",
+        as: "jobs",
+      },
+    },
+    {
+      $addFields: {
+        jobCount: { $size: "$jobs" },
+      },
+    },
+    {
+      $project: {
+        name: 1,
+        email: 1,
+        jobCount: 1,
+      },
+    },
+  ]);
+
+  return recruiters;
 };
 
 exports.getAllJobs = async () => {

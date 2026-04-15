@@ -16,6 +16,12 @@ const app = express();
 
 app.use(helmet());
 
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  message: "Too many requests, please try again later.",
+});
+
 app.use(limiter);
 
 app.use(
@@ -27,12 +33,6 @@ app.use(
 app.use(morgan("dev"));
 app.use(express.json());
 app.use(cookieParser());
-
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 100,
-  message: "Too many requests, please try again later.",
-});
 
 //routes
 app.use("/api/auth", authRoutes);

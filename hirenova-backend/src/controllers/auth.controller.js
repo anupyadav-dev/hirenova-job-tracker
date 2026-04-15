@@ -27,3 +27,25 @@ exports.loginController = asyncHandler(async (req, res) => {
     data: user,
   });
 });
+
+exports.getProfileController = asyncHandler(async (req, res) => {
+  const userId = req.user.id;
+  const user = await authService.getProfile(userId);
+
+  res.status(200).json({
+    success: true,
+    data: user,
+  });
+});
+
+exports.logoutController = asyncHandler(async (req, res) => {
+  res.cookie("token", "", {
+    httpOnly: true,
+    expires: new Date(0),
+  });
+
+  res.json({
+    success: true,
+    message: "Logged out successfully",
+  });
+});

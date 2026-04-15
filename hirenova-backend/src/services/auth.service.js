@@ -49,8 +49,16 @@ exports.loginUser = async ({ email, password }) => {
 
   const token = generateToken(user);
 
-  const userObj = user.toObject();
-  delete userObj.password;
+  const userOjb = user.toObject();
+  delete userOjb.password;
 
-  return { user: userObj, token };
+  return { user: userOjb, token };
+};
+
+exports.getProfile = async (userId) => {
+  const user = await User.findById(userId).select("-password");
+  if (!user) {
+    throw new Error("User not found");
+  }
+  return user;
 };

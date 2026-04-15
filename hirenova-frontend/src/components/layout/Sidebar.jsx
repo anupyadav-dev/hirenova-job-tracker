@@ -1,7 +1,7 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { toast } from "react-toastify";
-import { logout } from "../../features/auth/authSlice";
+import { logoutUser } from "../../features/auth/authSlice";
 
 const Sidebar = () => {
   const { user } = useSelector((state) => state.auth);
@@ -12,11 +12,11 @@ const Sidebar = () => {
   const isActive = (path) => (location.pathname === path ? "bg-gray-700" : "");
 
   const handleLogout = () => {
-    dispatch(logout());
+    dispatch(logoutUser());
     toast.success("Logged out successfully");
 
     setTimeout(() => {
-      navigate("/", { replace: true });
+      navigate("/");
     }, 0);
   };
 

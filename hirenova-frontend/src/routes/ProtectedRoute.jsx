@@ -5,7 +5,7 @@ import Loader from "../components/common/Loader";
 const ProtectedRoute = ({ children, role }) => {
   const { user, isAuthenticated, loading } = useSelector((state) => state.auth);
 
-  if (loading) <Loader />;
+  if (loading) return <Loader />;
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;

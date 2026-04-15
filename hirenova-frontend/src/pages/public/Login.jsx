@@ -9,7 +9,7 @@ const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const from = location.state?.from || "/";
+  const page = location.state?.from || "/";
 
   const [form, setForm] = useState({
     email: "",
@@ -32,12 +32,12 @@ const Login = () => {
 
       toast.success("Login successful ");
 
-      if (res.user.role === "recruiter") {
+      if (res.data.role === "recruiter") {
         navigate("/recruiter/dashboard");
-      } else if (res.user.role === "admin") {
+      } else if (res.data.role === "admin") {
         navigate("/admin/dashboard");
       } else {
-        navigate(from);
+        navigate(page);
       }
     } catch (err) {
       toast.error(err);

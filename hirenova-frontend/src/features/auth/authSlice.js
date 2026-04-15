@@ -8,7 +8,10 @@ export const registerUser = createAsyncThunk(
       const res = await api.post(`/auth/register`, userData);
       return res.data;
     } catch (err) {
-      return thunkAPI.rejectWithValue(err.response.data.message);
+      return (
+        thunkAPI.rejectWithValue(err.response?.data?.message) ||
+        "Register failed"
+      );
     }
   }
 );
@@ -20,7 +23,9 @@ export const loginUser = createAsyncThunk(
       const res = await api.post(`/auth/login`, userData);
       return res.data;
     } catch (err) {
-      return thunkAPI.rejectWithValue(err.response.data.message);
+      return (
+        thunkAPI.rejectWithValue(err.response?.data?.message) || "Login failed"
+      );
     }
   }
 );
@@ -32,7 +37,21 @@ export const loadUser = createAsyncThunk(
       const res = await api.get(`/auth/me`);
       return res.data.data;
     } catch (err) {
-      return thunkAPI.rejectWithValue(err.response.data.message);
+      return thunkAPI.rejectWithValue(null);
+    }
+  }
+);
+
+export const logoutUser = createAsyncThunk(
+  "auth/logout",
+  async (_, thunkAPI) => {
+    try {
+      await api.post("/auth/logout");
+      return true;
+    } catch (err) {
+      return (
+        thunkAPI.rejectWithValue(err.response?.data?.message) || "Logout failed"
+      );
     }
   }
 );
@@ -49,6 +68,8 @@ const authSlice = createSlice({
     logout: (state) => {
       state.user = null;
       state.isAuthenticated = false;
+      state.loading = false;
+      state.error = null;
     },
   },
   extraReducers: (builder) => {
@@ -88,6 +109,18 @@ const authSlice = createSlice({
         state.loading = false;
         state.user = null;
         state.isAuthenticated = false;
+      })
+      .addCase(logoutUser.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(logoutUser.fulfilled, (state) => {
+        state.loading = false;
+        state.user = null;
+        state.isAuthenticated = false;
+      })
+      .addCase(logoutUser.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
       });
   },
 });

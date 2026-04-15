@@ -2,17 +2,27 @@ import axios from "axios";
 
 const instance = axios.create({
   baseURL: "http://localhost:5000/api",
+  withCredentials: true,
 });
 
-// Add token automatically
-instance.interceptors.request.use((config) => {
-  const token = localStorage.getItem("token");
+instance.interceptors.response.use(
+  (res) => res,
+  (err) => {
+    if (
+      err.response &&
+      err.response.status === 401 &&
+      err.config &&
+      !err.config.url.includes("/auth/login") &&
+      !err.config.url.includes("/auth/logout")
+    ) {
+      if (!window.__isLoggingOut) {
+        window.__isLoggingOut = true;
+        window.dispatchEvent(new Event("logout"));
+      }
+    }
 
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+    return Promise.reject(err);
   }
-
-  return config;
-});
+);
 
 export default instance;

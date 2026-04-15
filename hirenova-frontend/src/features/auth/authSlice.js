@@ -1,57 +1,79 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import axios from "axios";
-import { jwtDecode } from "jwt-decode";
+import api from "../../api/axios";
 
-const API = "http://localhost:5000/api/auth";
-
-// REGISTER
 export const registerUser = createAsyncThunk(
   "auth/register",
   async (userData, thunkAPI) => {
     try {
-      const res = await axios.post(`${API}/register`, userData);
+      const res = await api.post(`/auth/register`, userData);
       return res.data;
     } catch (err) {
-      return thunkAPI.rejectWithValue(err.response.data.message);
+      return (
+        thunkAPI.rejectWithValue(err.response?.data?.message) ||
+        "Register failed"
+      );
     }
   }
 );
 
-// LOGIN
 export const loginUser = createAsyncThunk(
   "auth/login",
   async (userData, thunkAPI) => {
     try {
-      const res = await axios.post(`${API}/login`, userData);
-      localStorage.setItem("token", res.data.token);
+      const res = await api.post(`/auth/login`, userData);
       return res.data;
     } catch (err) {
-      return thunkAPI.rejectWithValue(err.response.data.message);
+      return (
+        thunkAPI.rejectWithValue(err.response?.data?.message) || "Login failed"
+      );
     }
   }
 );
-const token = localStorage.getItem("token");
-const user = token ? jwtDecode(token) : null;
+
+export const loadUser = createAsyncThunk(
+  "auth/loadUser",
+  async (_, thunkAPI) => {
+    try {
+      const res = await api.get(`/auth/me`);
+      return res.data.data;
+    } catch (err) {
+      return thunkAPI.rejectWithValue(null);
+    }
+  }
+);
+
+export const logoutUser = createAsyncThunk(
+  "auth/logout",
+  async (_, thunkAPI) => {
+    try {
+      await api.post("/auth/logout");
+      return true;
+    } catch (err) {
+      return (
+        thunkAPI.rejectWithValue(err.response?.data?.message) || "Logout failed"
+      );
+    }
+  }
+);
 
 const authSlice = createSlice({
   name: "auth",
   initialState: {
-    user: user,
-    token: token,
+    user: null,
+    isAuthenticated: false,
     loading: false,
     error: null,
   },
   reducers: {
     logout: (state) => {
       state.user = null;
-      state.token = null;
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
+      state.isAuthenticated = false;
+      state.loading = false;
+      state.error = null;
     },
   },
   extraReducers: (builder) => {
     builder
-      // REGISTER
       .addCase(registerUser.pending, (state) => {
         state.loading = true;
       })
@@ -63,16 +85,40 @@ const authSlice = createSlice({
         state.error = action.payload;
       })
 
-      // LOGIN
       .addCase(loginUser.pending, (state) => {
         state.loading = true;
       })
       .addCase(loginUser.fulfilled, (state, action) => {
         state.loading = false;
-        state.token = action.payload.token;
-        state.user = jwtDecode(action.payload.token);
+        state.user = action.payload.data;
+        state.isAuthenticated = true;
       })
       .addCase(loginUser.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      .addCase(loadUser.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(loadUser.fulfilled, (state, action) => {
+        state.loading = false;
+        state.user = action.payload;
+        state.isAuthenticated = true;
+      })
+      .addCase(loadUser.rejected, (state) => {
+        state.loading = false;
+        state.user = null;
+        state.isAuthenticated = false;
+      })
+      .addCase(logoutUser.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(logoutUser.fulfilled, (state) => {
+        state.loading = false;
+        state.user = null;
+        state.isAuthenticated = false;
+      })
+      .addCase(logoutUser.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       });

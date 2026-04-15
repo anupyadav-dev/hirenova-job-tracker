@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 
 import MainLayout from "../layouts/MainLayout";
 import DashboardLayout from "../layouts/DashboardLayout";
@@ -32,7 +32,7 @@ import "react-toastify/dist/ReactToastify.css";
 
 const AppRoutes = () => {
   return (
-    <BrowserRouter>
+    <>
       <ToastContainer position="top-right" autoClose={2000} />
 
       <Routes>
@@ -137,7 +137,7 @@ const AppRoutes = () => {
         </Route>
         <Route path="*" element={<h1>404 - Page Not Found</h1>} />
       </Routes>
-    </BrowserRouter>
+    </>
   );
 };
 

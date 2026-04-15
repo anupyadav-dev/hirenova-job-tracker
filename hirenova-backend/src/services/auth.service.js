@@ -22,7 +22,7 @@ exports.registerUser = async ({ name, email, password, role }) => {
     role,
   });
 
-  const token = generateToken({ id: createdUser._id, role: createdUser.role });
+  const token = generateToken(createdUser);
 
   const user = createdUser.toObject();
   delete user.password;
@@ -47,10 +47,18 @@ exports.loginUser = async ({ email, password }) => {
     throw new Error("Invalid email or password");
   }
 
-  const token = generateToken({ id: user._id, role: user.role });
+  const token = generateToken(user);
 
   const userOjb = user.toObject();
   delete userOjb.password;
 
-  return { userOjb, token };
+  return { user: userOjb, token };
+};
+
+exports.getProfile = async (userId) => {
+  const user = await User.findById(userId).select("-password");
+  if (!user) {
+    throw new Error("User not found");
+  }
+  return user;
 };

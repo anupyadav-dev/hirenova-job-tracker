@@ -1,16 +1,12 @@
 const jwt = require("jsonwebtoken");
 const User = require("../models/user.model");
 
-// Protect Routes
 exports.protect = async (req, res, next) => {
   try {
     let token;
 
-    if (
-      req.headers.authorization &&
-      req.headers.authorization.startsWith("Bearer")
-    ) {
-      token = req.headers.authorization.split(" ")[1];
+    if (req.cookies && req.cookies.token) {
+      token = req.cookies.token;
     }
 
     if (!token) {
@@ -31,7 +27,6 @@ exports.protect = async (req, res, next) => {
       });
     }
 
-    //  Blocked user check
     if (user.status === "blocked") {
       return res.status(403).json({
         success: false,
@@ -50,7 +45,6 @@ exports.protect = async (req, res, next) => {
   }
 };
 
-// Role-based authorization
 exports.authorize = (...roles) => {
   return (req, res, next) => {
     if (!roles.includes(req.user.role)) {

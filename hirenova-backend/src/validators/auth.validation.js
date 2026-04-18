@@ -17,8 +17,7 @@ export const registerValidation = [
     .matches(/[A-Z]/)
     .withMessage("Must include uppercase")
     .matches(/[0-9]/)
-    .withMessage("Must include number")
-    .normalizeEmail(),
+    .withMessage("Must include number"),
 
   body("role")
     .optional()
@@ -27,7 +26,7 @@ export const registerValidation = [
 ];
 
 export const loginValidation = [
-  body("email").isEmail().withMessage("Valid email required"),
+  body("email").isEmail().withMessage("Valid email required").normalizeEmail(),
 
   body("password").notEmpty().withMessage("Password is required"),
 ];

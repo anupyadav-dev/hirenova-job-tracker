@@ -1,0 +1,32 @@
+import express from "express";
+import {
+  getProfileController,
+  createMyProfileController,
+  updateMyProfileController,
+} from "./profile.controller.js";
+
+import { protect } from "../../middlewares/auth.middleware.js";
+import { validate } from "../../middlewares/validation.middleware.js";
+import { profileValidation } from "./profile.validation.js";
+
+const router = express.Router();
+
+router.get("/me", protect, getProfileController);
+
+router.post(
+  "/",
+  protect,
+  profileValidation,
+  validate,
+  createMyProfileController
+);
+
+router.put(
+  "/me",
+  protect,
+  profileValidation,
+  validate,
+  updateMyProfileController
+);
+
+export default router;

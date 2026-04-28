@@ -1,24 +1,23 @@
 import { asyncHandler } from "../../utils/asyncHandler.util.js";
 import {
-  getMyProfileService,
+  getProfileService,
   createProfileService,
   updateProfileService,
 } from "./profile.service.js";
 import { ApiResponse } from "../../utils/apiResponse.js";
 
 export const getProfileController = asyncHandler(async (req, res) => {
-  const profile = await getMyProfileService(req.user.id);
+  const profile = await getProfileService(req.user.id);
 
-  res.json({
-    success: true,
-    data: profile,
-  });
+  return res
+    .status(200)
+    .json(new ApiResponse(200, "Profile fetched successfully", profile));
 });
 
 export const createMyProfileController = asyncHandler(async (req, res) => {
   const profile = await createProfileService(req.user.id, req.body);
 
-  res
+  return res
     .status(201)
     .json(new ApiResponse(201, "Profile created successfully", profile));
 });
@@ -26,7 +25,7 @@ export const createMyProfileController = asyncHandler(async (req, res) => {
 export const updateMyProfileController = asyncHandler(async (req, res) => {
   const profile = await updateProfileService(req.user.id, req.body);
 
-  res
+  return res
     .status(200)
     .json(new ApiResponse(200, "Profile updated successfully", profile));
 });

@@ -9,19 +9,42 @@ const profileSchema = new mongoose.Schema(
       unique: true,
     },
 
-    bio: { type: String, default: "" },
+    bio: {
+      type: String,
+      trim: true,
+      maxlength: 500,
+      default: "",
+    },
 
-    skills: [{ type: String }],
+    skills: [
+      {
+        type: String,
+        trim: true,
+      },
+    ],
 
-    experience: { type: String, default: "" },
+    experience: {
+      type: String,
+      default: "",
+    },
 
-    phone: { type: String, default: "" },
+    phone: {
+      type: String,
+      default: "",
+    },
 
-    profileImage: { type: String, default: "" },
+    profileImage: {
+      url: { type: String, default: "" },
+      publicId: { type: String, default: "" },
+    },
 
-    resume: { type: String, default: "" },
+    resume: {
+      url: { type: String, default: "" },
+      publicId: { type: String, default: "" },
+      fileName: { type: String, default: "" },
+    },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 export const Profile = mongoose.model("Profile", profileSchema);

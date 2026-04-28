@@ -5,6 +5,9 @@ import {
   updateMyProfileController,
 } from "./profile.controller.js";
 
+import { upload } from "../../middlewares/upload.middleware.js";
+import { uploadResumeController } from "./profile.controller.js";
+
 import { protect } from "../../middlewares/auth.middleware.js";
 import { validate } from "../../middlewares/validation.middleware.js";
 import { profileValidation } from "./profile.validation.js";
@@ -18,7 +21,7 @@ router.post(
   protect,
   profileValidation,
   validate,
-  createMyProfileController
+  createMyProfileController,
 );
 
 router.put(
@@ -26,7 +29,14 @@ router.put(
   protect,
   profileValidation,
   validate,
-  updateMyProfileController
+  updateMyProfileController,
+);
+
+router.patch(
+  "/me/resume",
+  protect,
+  upload.single("resume"),
+  uploadResumeController,
 );
 
 export default router;

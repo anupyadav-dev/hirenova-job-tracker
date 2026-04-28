@@ -1,8 +1,7 @@
+import "./src/config/bootstrap.js";
+
 import app from "./src/app.js";
 import connectDB from "./src/config/db.js";
-import dotenv from "dotenv";
-
-dotenv.config();
 
 connectDB();
 

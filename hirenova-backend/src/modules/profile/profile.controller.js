@@ -3,6 +3,7 @@ import {
   getProfileService,
   createProfileService,
   updateProfileService,
+  uploadResumeService,
 } from "./profile.service.js";
 import { ApiResponse } from "../../utils/apiResponse.js";
 
@@ -28,4 +29,12 @@ export const updateMyProfileController = asyncHandler(async (req, res) => {
   return res
     .status(200)
     .json(new ApiResponse(200, "Profile updated successfully", profile));
+});
+
+export const uploadResumeController = asyncHandler(async (req, res) => {
+  const profile = await uploadResumeService(req.user.id, req.file);
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, profile, "Resume uploaded successfully"));
 });

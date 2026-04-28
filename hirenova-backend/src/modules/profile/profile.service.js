@@ -1,5 +1,24 @@
 import { Profile } from "./profile.model.js";
 import { ApiError } from "../../utils/apiError.js";
+import cloudinary from "../../utils/cloudinary.js";
+import streamifier from "streamifier";
+
+const uploadToCloudinary = (buffer) => {
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      {
+        folder: "hirenova/resume",
+        resource_type: "raw",
+      },
+      (error, result) => {
+        if (error) reject(error);
+        else resolve(result);
+      },
+    );
+
+    streamifier.createReadStream(buffer).pipe(stream);
+  });
+};
 
 const normalizeSkills = (skills) => {
   if (!skills) return [];
@@ -66,6 +85,48 @@ export const updateProfileService = async (userId, data) => {
   if (data.skills !== undefined) {
     profile.skills = normalizeSkills(data.skills);
   }
+
+  await profile.save();
+
+  return profile;
+};
+
+export const uploadResumeService = async (userId, file) => {
+  if (!file) {
+    throw new ApiError(400, "Resume file is required");
+  }
+
+  const allowedTypes = [
+    "application/pdf",
+    "application/msword",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  ];
+
+  if (!allowedTypes.includes(file.mimetype)) {
+    throw new ApiError(400, "Only PDF/DOC/DOCX allowed");
+  }
+
+  const profile = await Profile.findOne({
+    user: userId,
+  });
+
+  if (!profile) {
+    throw new ApiError(404, "Profile not found");
+  }
+
+  if (profile.resume?.publicId) {
+    await cloudinary.uploader.destroy(profile.resume.publicId, {
+      resource_type: "raw",
+    });
+  }
+
+  const result = await uploadToCloudinary(file.buffer);
+
+  profile.resume = {
+    url: result.secure_url,
+    publicId: result.public_id,
+    fileName: file.originalname,
+  };
 
   await profile.save();
 

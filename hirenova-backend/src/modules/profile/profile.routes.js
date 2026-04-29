@@ -39,4 +39,8 @@ router.patch(
   uploadResumeController,
 );
 
+router.get("/me/resume", protect, getResumeController);
+
+router.delete("/me/resume", protect, deleteResumeController);
+
 export default router;

@@ -126,6 +126,7 @@ export const uploadResumeService = async (userId, file) => {
     url: result.secure_url,
     publicId: result.public_id,
     fileName: file.originalname,
+    uploadedAt: new Date(),
   };
 
   await profile.save();

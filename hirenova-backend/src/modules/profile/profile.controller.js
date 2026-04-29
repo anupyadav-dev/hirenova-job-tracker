@@ -38,3 +38,41 @@ export const uploadResumeController = asyncHandler(async (req, res) => {
     .status(200)
     .json(new ApiResponse(200, profile, "Resume uploaded successfully"));
 });
+
+export const getResumeController = asyncHandler(async (req, res) => {
+  const profile = await Profile.findOne({ user: req.user.id });
+
+  if (!profile?.resume?.url) {
+    throw new ApiError(404, "No resume found");
+  }
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, profile.resume, "Resume fetched successfully"));
+});
+
+
+export const deleteResumeController = asyncHandler(async (req, res) => {
+  const profile = await Profile.findOne({ user: req.user.id });
+
+  if (!profile?.resume?.publicId) {
+    throw new ApiError(404, "No resume to delete");
+  }
+
+  await cloudinary.uploader.destroy(profile.resume.publicId, {
+    resource_type: "raw",
+  });
+
+  profile.resume = {
+    url: "",
+    publicId: "",
+    fileName: "",
+    uploadedAt: null,
+  };
+
+  await profile.save();
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, null, "Resume deleted successfully"));
+});

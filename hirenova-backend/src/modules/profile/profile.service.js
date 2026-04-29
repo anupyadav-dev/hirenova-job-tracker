@@ -133,3 +133,92 @@ export const uploadResumeService = async (userId, file) => {
 
   return profile;
 };
+
+const uploadAvatarToCloudinary = (buffer) => {
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      {
+        folder: "hirenova/avatar",
+        transformation: [
+          {
+            width: 300,
+            height: 300,
+            crop: "fill",
+          },
+          {
+            quality: "auto",
+          },
+        ],
+      },
+      (error, result) => {
+        if (error) return reject(error);
+
+        resolve(result);
+      },
+    );
+
+    streamifier.createReadStream(buffer).pipe(stream);
+  });
+};
+
+export const uploadAvatarService = async (userId, file) => {
+  if (!file) {
+    throw new ApiError(400, "Avatar file is required");
+  }
+
+  const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+
+  if (!allowedTypes.includes(file.mimetype)) {
+    throw new ApiError(400, "Only JPG PNG WEBP allowed");
+  }
+
+  const profile = await Profile.findOne({
+    user: userId,
+  });
+
+  if (!profile) {
+    throw new ApiError(404, "Profile not found");
+  }
+
+  // Delete old avatar
+  if (profile.profileImage?.publicId) {
+    await cloudinary.uploader.destroy(profile.profileImage.publicId);
+  }
+
+  // Upload new avatar
+  const result = await uploadAvatarToCloudinary(file.buffer);
+
+  profile.profileImage = {
+    url: result.secure_url,
+    publicId: result.public_id,
+  };
+
+  await profile.save();
+
+  return profile;
+};
+
+export const deleteAvatarService = async (userId) => {
+  const profile = await Profile.findOne({
+    user: userId,
+  });
+
+  if (!profile) {
+    throw new ApiError(404, "Profile not found");
+  }
+
+  if (!profile.profileImage?.publicId) {
+    throw new ApiError(404, "Avatar not found");
+  }
+
+  await cloudinary.uploader.destroy(profile.profileImage.publicId);
+
+  profile.profileImage = {
+    url: "",
+    publicId: "",
+  };
+
+  await profile.save();
+
+  return profile;
+};

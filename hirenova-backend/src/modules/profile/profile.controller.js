@@ -80,3 +80,19 @@ export const deleteResumeController = asyncHandler(async (req, res) => {
     .status(200)
     .json(new ApiResponse(200, "Resume deleted successfully", null));
 });
+
+export const uploadAvatarController = asyncHandler(async (req, res) => {
+  const profile = await uploadAvatarService(req.user.id, req.file);
+
+  res
+    .status(200)
+    .json(new ApiResponse(200, profile, "Avatar uploaded successfully"));
+});
+
+export const deleteAvatarController = asyncHandler(async (req, res) => {
+  await deleteAvatarService(req.user.id);
+
+  res
+    .status(200)
+    .json(new ApiResponse(200, null, "Avatar deleted successfully"));
+});

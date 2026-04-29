@@ -5,9 +5,12 @@ import {
   updateMyProfileController,
   getResumeController,
   deleteResumeController,
+  uploadAvatarController,
+  deleteAvatarController,
 } from "./profile.controller.js";
 
-import { upload } from "../../middlewares/upload.middleware.js";
+import { resumeUpload } from "../../middlewares/upload.middleware.js";
+import { avatarUpload } from "../../middlewares/avatarUpload.middleware.js";
 import { uploadResumeController } from "./profile.controller.js";
 
 import { protect } from "../../middlewares/auth.middleware.js";
@@ -37,12 +40,21 @@ router.put(
 router.patch(
   "/me/resume",
   protect,
-  upload.single("resume"),
+  resumeUpload.single("resume"),
   uploadResumeController,
 );
 
 router.get("/me/resume", protect, getResumeController);
 
 router.delete("/me/resume", protect, deleteResumeController);
+
+router.patch(
+  "/me/avatar",
+  protect,
+  avatarUpload.single("avatar"),
+  uploadAvatarController,
+);
+
+router.delete("/me/avatar", protect, deleteAvatarController);
 
 export default router;

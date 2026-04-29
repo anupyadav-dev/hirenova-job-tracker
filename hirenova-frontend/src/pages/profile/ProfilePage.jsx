@@ -12,6 +12,9 @@ import AvatarUpload from "./AvatarUpload";
 import ResumeUpload from "./ResumeUpload";
 import CreateProfileForm from "./CreateProfileForm";
 
+import Loader from "../../components/common/Loader";
+import ErrorState from "../../components/common/ErrorState";
+
 function ProfilePage() {
   const dispatch = useDispatch();
 
@@ -25,12 +28,10 @@ function ProfilePage() {
     dispatch(getMyProfile());
   }, [dispatch]);
 
-  // Loader
   if (loading && !profile) {
-    return <div className="p-10 text-center">Loading...</div>;
+    return <Loader />;
   }
 
-  // If profile not found
   if (error === "Profile not found") {
     return (
       <div className="max-w-3xl mx-auto p-6">
@@ -39,126 +40,138 @@ function ProfilePage() {
     );
   }
 
-  // Other errors
-  if (error) {
-    return <div className="p-10 text-red-500">{error}</div>;
+  if (error && !profile) {
+    return <ErrorState message={error} />;
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      <div className="bg-white rounded-2xl shadow p-6">
-        {/* Header */}
-        <div className="flex flex-col md:flex-row gap-6 md:items-center justify-between">
-          {/* Left */}
-          <div className="flex gap-5 items-center">
-            <div>
-              <img
-                src={profile?.profileImage?.url}
-                alt="avatar"
-                className="w-24 h-24 rounded-full object-cover"
-              />
+    <div className="max-w-5xl mx-auto p-6">
+      <div className="bg-white shadow-xl rounded-3xl overflow-hidden">
+        <div className="h-32 bg-gradient-to-r from-blue-600 to-indigo-600"></div>
 
-              <div className="mt-2 space-y-2">
-                <AvatarUpload />
+        <div className="px-6 pb-8">
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between -mt-14 gap-5">
+            <div className="flex items-end gap-5">
+              <div>
+                <img
+                  src={
+                    profile?.profileImage?.url ||
+                    "https://via.placeholder.com/120"
+                  }
+                  alt="avatar"
+                  className="w-28 h-28 rounded-full border-4 border-white object-cover shadow"
+                />
 
-                {profile?.profileImage?.url && (
-                  <button
-                    onClick={() => dispatch(deleteAvatar())}
-                    className="text-red-500 text-sm"
-                  >
-                    Delete Photo
-                  </button>
-                )}
+                <div className="mt-3 space-y-2">
+                  <AvatarUpload />
+
+                  {profile?.profileImage?.url && (
+                    <button
+                      onClick={() => dispatch(deleteAvatar())}
+                      className="block text-sm text-red-500"
+                    >
+                      Remove Photo
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              <div className="pb-2">
+                <h1 className="text-3xl font-bold">{profile?.user?.name}</h1>
+
+                <p className="text-gray-500">{profile?.user?.email}</p>
               </div>
             </div>
 
-            <div>
-              <h1 className="text-2xl font-bold">{profile?.user?.name}</h1>
-
-              <p className="text-gray-500">{profile?.user?.email}</p>
-
-              <p className="mt-2 text-sm text-blue-600">
-                Completion: {completion?.percentage || 0}%
-              </p>
-            </div>
-          </div>
-
-          {/* Right */}
-          <div>
             <button
               onClick={() => setOpenEdit(true)}
-              className="bg-blue-600 text-white px-4 py-2 rounded"
+              className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-xl"
             >
               Edit Profile
             </button>
           </div>
-        </div>
 
-        {/* Bio */}
-        <div className="mt-8">
-          <h2 className="font-semibold text-lg">Bio</h2>
+          <div className="mt-8">
+            <div className="flex justify-between text-sm mb-2">
+              <span className="font-medium">Profile Completion</span>
 
-          <p className="text-gray-700 mt-1">{profile?.bio || "No bio added"}</p>
-        </div>
-
-        {/* Resume */}
-        <div className="mt-8">
-          <h2 className="font-semibold text-lg mb-2">Resume</h2>
-
-          {profile?.resume?.url ? (
-            <div className="flex gap-3 flex-wrap items-center">
-              <p className="text-sm text-gray-700">
-                {profile?.resume?.fileName || "Uploaded Resume"}
-              </p>
-
-              <a
-                href={profile.resume.url}
-                target="_blank"
-                rel="noreferrer"
-                className="text-blue-600 underline"
-              >
-                View Resume
-              </a>
-
-              <ResumeUpload />
-
-              <button
-                onClick={() => dispatch(deleteResume())}
-                className="text-red-500 text-sm"
-              >
-                Delete Resume
-              </button>
+              <span>{completion?.percentage || 0}%</span>
             </div>
-          ) : (
-            <div className="flex gap-3 items-center">
-              <p>No resume uploaded</p>
-              <ResumeUpload />
+
+            <div className="w-full h-3 bg-gray-200 rounded-full overflow-hidden">
+              <div
+                style={{
+                  width: `${completion?.percentage || 0}%`,
+                }}
+                className="h-full bg-blue-600"
+              ></div>
             </div>
-          )}
-        </div>
+          </div>
 
-        {/* Skills */}
-        <div className="mt-8">
-          <h2 className="font-semibold text-lg">Skills</h2>
+          <div className="mt-8">
+            <h2 className="text-xl font-semibold mb-2">About Me</h2>
 
-          <div className="flex gap-2 flex-wrap mt-2">
-            {profile?.skills?.length > 0 ? (
-              profile.skills.map((skill, index) => (
-                <span
-                  key={index}
-                  className="px-3 py-1 bg-gray-100 rounded-full text-sm"
-                >
-                  {skill}
+            <p className="text-gray-700 leading-7">
+              {profile?.bio || "No bio added yet."}
+            </p>
+          </div>
+
+          <div className="mt-8">
+            <h2 className="text-xl font-semibold mb-3">Resume</h2>
+
+            {profile?.resume?.url ? (
+              <div className="flex flex-wrap gap-3 items-center">
+                <span className="px-3 py-2 bg-gray-100 rounded-lg text-sm">
+                  {profile?.resume?.fileName}
                 </span>
-              ))
+
+                <a
+                  href={profile.resume.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-blue-600 underline"
+                >
+                  View Resume
+                </a>
+
+                <ResumeUpload />
+
+                <button
+                  onClick={() => dispatch(deleteResume())}
+                  className="text-red-500 text-sm"
+                >
+                  Delete Resume
+                </button>
+              </div>
             ) : (
-              <p>No skills added</p>
+              <div className="flex gap-3 items-center">
+                <span>No resume uploaded</span>
+                <ResumeUpload />
+              </div>
             )}
+          </div>
+
+          <div className="mt-8">
+            <h2 className="text-xl font-semibold mb-3">Skills</h2>
+
+            <div className="flex flex-wrap gap-3">
+              {profile?.skills?.length > 0 ? (
+                profile.skills.map((skill, index) => (
+                  <span
+                    key={index}
+                    className="px-4 py-2 bg-blue-50 text-blue-700 rounded-full text-sm font-medium"
+                  >
+                    {skill}
+                  </span>
+                ))
+              ) : (
+                <p>No skills added.</p>
+              )}
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Modal */}
       {openEdit && (
         <EditProfileModal
           profile={profile}

@@ -1,4 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+
 import axios from "../../api/axios";
 
 export const getMyProfile = createAsyncThunk(
@@ -6,6 +7,7 @@ export const getMyProfile = createAsyncThunk(
   async (_, thunkAPI) => {
     try {
       const res = await axios.get("/profile/me");
+
       return res.data.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(
@@ -16,12 +18,14 @@ export const getMyProfile = createAsyncThunk(
 );
 
 export const createMyProfile = createAsyncThunk(
-  "profile/create",
+  "profile/createMyProfile",
   async (profileData, thunkAPI) => {
     try {
-      const res = await axios.post("/profile", profileData);
+      await axios.post("/profile", profileData);
 
-      return res.data.data;
+      await thunkAPI.dispatch(getMyProfile());
+
+      return true;
     } catch (error) {
       return thunkAPI.rejectWithValue(
         error.response?.data?.message || "Create profile failed",
@@ -34,12 +38,14 @@ export const updateMyProfile = createAsyncThunk(
   "profile/updateMyProfile",
   async (profileData, thunkAPI) => {
     try {
-      const res = await axios.put("/profile/me", profileData);
+      await axios.put("/profile/me", profileData);
 
-      return res.data.data;
+      await thunkAPI.dispatch(getMyProfile());
+
+      return true;
     } catch (error) {
       return thunkAPI.rejectWithValue(
-        error.response?.data?.message || "Profile update failed",
+        error.response?.data?.message || "Update failed",
       );
     }
   },
@@ -53,13 +59,11 @@ export const uploadAvatar = createAsyncThunk(
 
       formData.append("avatar", file);
 
-      const res = await axios.patch("/profile/me/avatar", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
+      await axios.patch("/profile/me/avatar", formData);
 
-      return res.data.data;
+      await thunkAPI.dispatch(getMyProfile());
+
+      return true;
     } catch (error) {
       return thunkAPI.rejectWithValue(
         error.response?.data?.message || "Avatar upload failed",
@@ -74,9 +78,13 @@ export const deleteAvatar = createAsyncThunk(
     try {
       await axios.delete("/profile/me/avatar");
 
+      await thunkAPI.dispatch(getMyProfile());
+
       return true;
     } catch (error) {
-      return thunkAPI.rejectWithValue(error.response?.data?.message);
+      return thunkAPI.rejectWithValue(
+        error.response?.data?.message || "Delete avatar failed",
+      );
     }
   },
 );
@@ -89,13 +97,11 @@ export const uploadResume = createAsyncThunk(
 
       formData.append("resume", file);
 
-      const res = await axios.patch("/profile/me/resume", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
+      await axios.patch("/profile/me/resume", formData);
 
-      return res.data.data;
+      await thunkAPI.dispatch(getMyProfile());
+
+      return true;
     } catch (error) {
       return thunkAPI.rejectWithValue(
         error.response?.data?.message || "Resume upload failed",
@@ -110,9 +116,13 @@ export const deleteResume = createAsyncThunk(
     try {
       await axios.delete("/profile/me/resume");
 
+      await thunkAPI.dispatch(getMyProfile());
+
       return true;
     } catch (error) {
-      return thunkAPI.rejectWithValue(error.response?.data?.message);
+      return thunkAPI.rejectWithValue(
+        error.response?.data?.message || "Delete resume failed",
+      );
     }
   },
 );
@@ -139,82 +149,50 @@ const profileSlice = createSlice({
 
       .addCase(getMyProfile.fulfilled, (state, action) => {
         state.loading = false;
+
         state.profile = action.payload.profile;
+
         state.completion = action.payload.completion;
       })
 
       .addCase(getMyProfile.rejected, (state, action) => {
         state.loading = false;
+
         state.error = action.payload;
       })
 
-      .addCase(createMyProfile.pending, (state) => {
-        state.loading = true;
-      })
+      .addMatcher(
+        (action) =>
+          action.type.endsWith("/pending") &&
+          action.type !== getMyProfile.pending.type,
 
-      .addCase(createMyProfile.fulfilled, (state, action) => {
-        state.loading = false;
-        state.profile = action.payload;
-      })
+        (state) => {
+          state.loading = true;
+          state.error = null;
+        },
+      )
 
-      .addCase(createMyProfile.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
-      })
+      .addMatcher(
+        (action) =>
+          action.type.endsWith("/fulfilled") &&
+          action.type !== getMyProfile.fulfilled.type,
 
-      .addCase(updateMyProfile.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
+        (state) => {
+          state.loading = false;
+        },
+      )
 
-      .addCase(updateMyProfile.fulfilled, (state, action) => {
-        state.loading = false;
-        state.profile = action.payload;
-      })
+      .addMatcher(
+        (action) =>
+          action.type.endsWith("/rejected") &&
+          action.type !== getMyProfile.rejected.type,
 
-      .addCase(updateMyProfile.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
-      })
+        (state, action) => {
+          state.loading = false;
 
-      .addCase(uploadAvatar.pending, (state) => {
-        state.loading = true;
-      })
-
-      .addCase(uploadAvatar.fulfilled, (state, action) => {
-        state.loading = false;
-        state.profile = action.payload;
-      })
-
-      .addCase(uploadAvatar.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
-      })
-
-      .addCase(deleteAvatar.fulfilled, (state) => {
-        state.profile.profileImage = {
-          url: "",
-          publicId: "",
-        };
-      })
-
-      .addCase(uploadResume.pending, (state) => {
-        state.loading = true;
-      })
-
-      .addCase(uploadResume.fulfilled, (state, action) => {
-        state.loading = false;
-        state.profile = action.payload;
-      })
-
-      .addCase(uploadResume.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
-      })
-
-      .addCase(deleteResume.fulfilled, (state) => {
-        state.profile.resume = {};
-      });
+          state.error = action.payload;
+        },
+      );
   },
 });
 

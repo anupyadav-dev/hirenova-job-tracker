@@ -3,6 +3,8 @@ import {
   getProfileController,
   createMyProfileController,
   updateMyProfileController,
+  getResumeController,
+  deleteResumeController,
 } from "./profile.controller.js";
 
 import { upload } from "../../middlewares/upload.middleware.js";

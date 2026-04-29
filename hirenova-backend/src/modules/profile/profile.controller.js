@@ -6,13 +6,18 @@ import {
   uploadResumeService,
 } from "./profile.service.js";
 import { ApiResponse } from "../../utils/apiResponse.js";
+import { calculateProfileCompletion } from "./profileCompletion.js";
 
 export const getProfileController = asyncHandler(async (req, res) => {
   const profile = await getProfileService(req.user.id);
+  const completion = calculateProfileCompletion(profile);
 
-  return res
-    .status(200)
-    .json(new ApiResponse(200, "Profile fetched successfully", profile));
+  return res.status(200).json(
+    new ApiResponse(200, "Profile fetched successfully", {
+      profile,
+      completion,
+    }),
+  );
 });
 
 export const createMyProfileController = asyncHandler(async (req, res) => {
@@ -36,7 +41,7 @@ export const uploadResumeController = asyncHandler(async (req, res) => {
 
   return res
     .status(200)
-    .json(new ApiResponse(200, profile, "Resume uploaded successfully"));
+    .json(new ApiResponse(200, "Resume uploaded successfully", profile));
 });
 
 export const getResumeController = asyncHandler(async (req, res) => {
@@ -48,9 +53,8 @@ export const getResumeController = asyncHandler(async (req, res) => {
 
   return res
     .status(200)
-    .json(new ApiResponse(200, profile.resume, "Resume fetched successfully"));
+    .json(new ApiResponse(200, "Resume fetched successfully", profile.resume));
 });
-
 
 export const deleteResumeController = asyncHandler(async (req, res) => {
   const profile = await Profile.findOne({ user: req.user.id });
@@ -74,5 +78,5 @@ export const deleteResumeController = asyncHandler(async (req, res) => {
 
   return res
     .status(200)
-    .json(new ApiResponse(200, null, "Resume deleted successfully"));
+    .json(new ApiResponse(200, "Resume deleted successfully", null));
 });

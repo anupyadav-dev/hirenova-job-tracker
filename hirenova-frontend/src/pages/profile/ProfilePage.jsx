@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { getMyProfile } from "../../features/profile/profileSlice";
 import EditProfileModal from "./EditProfileModal";
+import AvatarUpload from "./AvatarUpload";
 
 function ProfilePage() {
   const dispatch = useDispatch();
@@ -23,13 +24,16 @@ function ProfilePage() {
     <div className="max-w-4xl mx-auto p-6">
       <div className="bg-white rounded-2xl shadow p-6">
         <div className="flex items-center gap-5">
-          <img
-            src={
-              profile?.profileImage?.url || "https://via.placeholder.com/120"
-            }
-            alt="avatar"
-            className="w-24 h-24 rounded-full object-cover"
-          />
+          <div>
+            <img
+              src={
+                profile?.profileImage?.url || "https://via.placeholder.com/120"
+              }
+              alt="avatar"
+              className="w-24 h-24 rounded-full object-cover"
+            />
+            <AvatarUpload />
+          </div>
 
           <div>
             <h1 className="text-2xl font-bold">

@@ -30,6 +30,29 @@ export const updateMyProfile = createAsyncThunk(
   },
 );
 
+export const uploadAvatar = createAsyncThunk(
+  "profile/uploadAvatar",
+  async (file, thunkAPI) => {
+    try {
+      const formData = new FormData();
+
+      formData.append("avatar", file);
+
+      const res = await axios.patch("/profile/me/avatar", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      return res.data.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(
+        error.response?.data?.message || "Avatar upload failed",
+      );
+    }
+  },
+);
+
 const profileSlice = createSlice({
   name: "profile",
 
@@ -72,6 +95,20 @@ const profileSlice = createSlice({
       })
 
       .addCase(updateMyProfile.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+
+      .addCase(uploadAvatar.pending, (state) => {
+        state.loading = true;
+      })
+
+      .addCase(uploadAvatar.fulfilled, (state, action) => {
+        state.loading = false;
+        state.profile = action.payload;
+      })
+
+      .addCase(uploadAvatar.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       });

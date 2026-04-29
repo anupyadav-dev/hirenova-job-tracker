@@ -13,7 +13,7 @@ export const registerUser = createAsyncThunk(
         "Register failed"
       );
     }
-  }
+  },
 );
 
 export const loginUser = createAsyncThunk(
@@ -27,19 +27,19 @@ export const loginUser = createAsyncThunk(
         thunkAPI.rejectWithValue(err.response?.data?.message) || "Login failed"
       );
     }
-  }
+  },
 );
 
 export const loadUser = createAsyncThunk(
   "auth/loadUser",
   async (_, thunkAPI) => {
     try {
-      const res = await api.get(`/auth/me`);
+      const res = await api.get(`/users/me`);
       return res.data.data;
     } catch (err) {
       return thunkAPI.rejectWithValue(null);
     }
-  }
+  },
 );
 
 export const logoutUser = createAsyncThunk(
@@ -53,7 +53,7 @@ export const logoutUser = createAsyncThunk(
         thunkAPI.rejectWithValue(err.response?.data?.message) || "Logout failed"
       );
     }
-  }
+  },
 );
 
 const authSlice = createSlice({

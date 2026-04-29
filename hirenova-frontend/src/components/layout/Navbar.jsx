@@ -26,6 +26,7 @@ const Navbar = () => {
           <>
             <Link to="/">Home</Link>
             <Link to="/my-applications">My Applications</Link>
+            <Link to="/profile">Profile</Link>
           </>
         )}
 

@@ -13,6 +13,7 @@ import JobDetails from "../pages/user/JobDetails";
 
 // User
 import MyApplications from "../pages/user/MyApplications";
+import ProfilePage from "../pages/profile/ProfilePage";
 
 // Recruiter
 import CreateJob from "../pages/recruiter/CreateJob";
@@ -54,6 +55,15 @@ const AppRoutes = () => {
             element={
               <ProtectedRoute role="user">
                 <MyApplications />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <ProfilePage />
               </ProtectedRoute>
             }
           />

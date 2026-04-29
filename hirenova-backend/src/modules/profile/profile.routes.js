@@ -9,7 +9,7 @@ import {
   deleteAvatarController,
 } from "./profile.controller.js";
 
-import { resumeUpload } from "../../middlewares/upload.middleware.js";
+import { resumeUpload } from "../../middlewares/resumeUpload.middleware.js";
 import { avatarUpload } from "../../middlewares/avatarUpload.middleware.js";
 import { uploadResumeController } from "./profile.controller.js";
 

@@ -1,11 +1,21 @@
+import { Profile } from "./profile.model.js";
 import { asyncHandler } from "../../utils/asyncHandler.util.js";
+
 import {
   getProfileService,
   createProfileService,
   updateProfileService,
-  uploadResumeService,
 } from "./profile.service.js";
+
+import {
+  uploadResumeService,
+  deleteResumeService,
+  uploadAvatarService,
+  deleteAvatarService,
+} from "./profileUpload.service.js";
+
 import { ApiResponse } from "../../utils/apiResponse.js";
+
 import { calculateProfileCompletion } from "./profileCompletion.js";
 
 export const getProfileController = asyncHandler(async (req, res) => {
@@ -57,24 +67,7 @@ export const getResumeController = asyncHandler(async (req, res) => {
 });
 
 export const deleteResumeController = asyncHandler(async (req, res) => {
-  const profile = await Profile.findOne({ user: req.user.id });
-
-  if (!profile?.resume?.publicId) {
-    throw new ApiError(404, "No resume to delete");
-  }
-
-  await cloudinary.uploader.destroy(profile.resume.publicId, {
-    resource_type: "raw",
-  });
-
-  profile.resume = {
-    url: "",
-    publicId: "",
-    fileName: "",
-    uploadedAt: null,
-  };
-
-  await profile.save();
+  await deleteResumeService(req.user.id);
 
   return res
     .status(200)
@@ -86,7 +79,7 @@ export const uploadAvatarController = asyncHandler(async (req, res) => {
 
   res
     .status(200)
-    .json(new ApiResponse(200, profile, "Avatar uploaded successfully"));
+    .json(new ApiResponse(200, "Avatar uploaded successfully", profile));
 });
 
 export const deleteAvatarController = asyncHandler(async (req, res) => {
@@ -94,5 +87,5 @@ export const deleteAvatarController = asyncHandler(async (req, res) => {
 
   res
     .status(200)
-    .json(new ApiResponse(200, null, "Avatar deleted successfully"));
+    .json(new ApiResponse(200, "Avatar deleted successfully", null));
 });

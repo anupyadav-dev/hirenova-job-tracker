@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { getMyProfile } from "../../features/profile/profileSlice";
 import EditProfileModal from "./EditProfileModal";
 import AvatarUpload from "./AvatarUpload";
+import ResumeUpload from "./ResumeUpload";
 
 function ProfilePage() {
   const dispatch = useDispatch();
@@ -59,6 +60,34 @@ function ProfilePage() {
           <h2 className="font-semibold text-lg">Bio</h2>
 
           <p className="text-gray-700 mt-1">{profile?.bio || "No bio added"}</p>
+        </div>
+
+        <div className="mt-6">
+          <h2 className="text-lg font-semibold mb-2">Resume</h2>
+
+          {profile?.resume?.url ? (
+            <div className="flex items-center gap-3 flex-wrap">
+              <p className="text-sm text-gray-700">
+                {profile?.resume?.fileName || "Uploaded Resume"}
+              </p>
+
+              <a
+                href={profile.resume.url}
+                target="_blank"
+                rel="noreferrer"
+                className="text-blue-600 underline"
+              >
+                View Resume
+              </a>
+
+              <ResumeUpload />
+            </div>
+          ) : (
+            <div className="flex items-center gap-3">
+              <p>No resume uploaded</p>
+              <ResumeUpload />
+            </div>
+          )}
         </div>
 
         <div className="mt-6">

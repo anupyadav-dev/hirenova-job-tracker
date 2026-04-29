@@ -53,6 +53,29 @@ export const uploadAvatar = createAsyncThunk(
   },
 );
 
+export const uploadResume = createAsyncThunk(
+  "profile/uploadResume",
+  async (file, thunkAPI) => {
+    try {
+      const formData = new FormData();
+
+      formData.append("resume", file);
+
+      const res = await axios.patch("/profile/me/resume", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      return res.data.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(
+        error.response?.data?.message || "Resume upload failed",
+      );
+    }
+  },
+);
+
 const profileSlice = createSlice({
   name: "profile",
 
@@ -109,6 +132,19 @@ const profileSlice = createSlice({
       })
 
       .addCase(uploadAvatar.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      .addCase(uploadResume.pending, (state) => {
+        state.loading = true;
+      })
+
+      .addCase(uploadResume.fulfilled, (state, action) => {
+        state.loading = false;
+        state.profile = action.payload;
+      })
+
+      .addCase(uploadResume.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       });

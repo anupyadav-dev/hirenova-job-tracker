@@ -1,9 +1,11 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { getMyProfile } from "../../features/profile/profileSlice";
+import EditProfileModal from "./EditProfileModal";
 
 function ProfilePage() {
   const dispatch = useDispatch();
+  const [openEdit, setOpenEdit] = useState(false);
 
   const { profile, completion, loading, error } = useSelector(
     (state) => state.profile,
@@ -30,7 +32,15 @@ function ProfilePage() {
           />
 
           <div>
-            <h1 className="text-2xl font-bold">{profile?.user?.name}</h1>
+            <h1 className="text-2xl font-bold">
+              {profile?.user?.name}{" "}
+              <button
+                onClick={() => setOpenEdit(true)}
+                className="mt-4 bg-blue-600 text-white px-4 py-2 rounded"
+              >
+                Edit Profile
+              </button>
+            </h1>
 
             <p className="text-gray-500">{profile?.user?.email}</p>
 
@@ -66,6 +76,13 @@ function ProfilePage() {
           </div>
         </div>
       </div>
+
+      {openEdit && (
+        <EditProfileModal
+          profile={profile}
+          onClose={() => setOpenEdit(false)}
+        />
+      )}
     </div>
   );
 }

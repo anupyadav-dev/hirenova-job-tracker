@@ -1,6 +1,7 @@
 import { registerUserService, loginUserService } from "./auth.service.js";
 import { asyncHandler } from "../../utils/asyncHandler.util.js";
 import { ApiResponse } from "../../utils/apiResponse.js";
+import { cookieOptions } from "../../constants/cookieOptions.js";
 
 export const registerController = asyncHandler(async (req, res) => {
   const { user } = await registerUserService(req.body);
@@ -14,20 +15,15 @@ export const loginController = asyncHandler(async (req, res) => {
   const { user, token } = await loginUserService(req.body);
 
   res.cookie("token", token, {
-    httpOnly: true,
-    secure: false,
-    sameSite: "lax",
-    maxAge: 15 * 60 * 1000,
+    ...cookieOptions,
+    maxAge: 15 * 60 * 1000, // 15 min
   });
 
   res.status(200).json(new ApiResponse(200, "User login successfully", user));
 });
 
 export const logoutController = asyncHandler(async (req, res) => {
-  res.cookie("token", "", {
-    httpOnly: true,
-    expires: new Date(0),
-  });
+  res.clearCookie("token", cookieOptions);
 
   res.status(200).json(new ApiResponse(200, "Logged out successfully"));
 });

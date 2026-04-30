@@ -8,13 +8,15 @@ const instance = axios.create({
 instance.interceptors.response.use(
   (res) => res,
   (err) => {
-    if (
-      err.response &&
-      err.response.status === 401 &&
-      err.config &&
-      !err.config.url.includes("/auth/login") &&
-      !err.config.url.includes("/auth/logout")
-    ) {
+    const url = err.config?.url || "";
+
+    const isUnauthorized = err.response?.status === 401;
+
+    const ignoreRoutes = ["/auth/login", "/auth/logout", "/users/me"];
+
+    const shouldIgnore = ignoreRoutes.some((route) => url.includes(route));
+
+    if (isUnauthorized && !shouldIgnore) {
       if (!window.__isLoggingOut) {
         window.__isLoggingOut = true;
         window.dispatchEvent(new Event("logout"));

@@ -1,14 +1,20 @@
 import express from "express";
-const router = express.Router();
+import {
+  getRecruiterDashboard,
+  getAdminDashboard,
+} from "./dashboard.controller.js";
 
-import { getRecruiterDashboard } from "./dashboard.controller.js";
 import { protect, authorize } from "../../middlewares/auth.middleware.js";
+
+const router = express.Router();
 
 router.get(
   "/recruiter",
   protect,
   authorize("recruiter"),
-  getRecruiterDashboard
+  getRecruiterDashboard,
 );
+
+router.get("/admin", protect, authorize("admin"), getAdminDashboard);
 
 export default router;

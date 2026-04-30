@@ -1,58 +1,44 @@
 import { asyncHandler } from "../../utils/asyncHandler.util.js";
 import { ApiResponse } from "../../utils/apiResponse.js";
+
 import {
   applyJobService,
   getMyApplicationsService,
   getApplicantsService,
   updateApplicationStatusService,
+  withdrawApplicationService,
 } from "./application.service.js";
 
 export const applyJob = asyncHandler(async (req, res) => {
-  const jobId = req.params.jobId;
-  const userId = req.user.id;
+  const app = await applyJobService(req.params.jobId, req.user._id);
 
-  const application = await applyJobService(jobId, userId);
-
-  res.status(201).json({
-    success: true,
-    message: "Application submitted successfully",
-    application,
-  });
+  res.status(201).json(new ApiResponse(201, "Applied successfully", app));
 });
 
 export const getMyApplications = asyncHandler(async (req, res) => {
   const apps = await getMyApplicationsService(req.user._id);
 
-  res.json({
-    success: true,
-    applications: apps,
-  });
+  res.json(new ApiResponse(200, "Applications fetched", apps));
 });
 
 export const getApplicants = asyncHandler(async (req, res) => {
-  const apps = await getApplicantsService(req.params.jobId);
+  const apps = await getApplicantsService(req.params.jobId, req.user._id);
 
-  res.json({
-    success: true,
-    applicants: apps,
-  });
+  res.json(new ApiResponse(200, "Applicants fetched", apps));
 });
 
 export const updateApplicationStatus = asyncHandler(async (req, res) => {
-  const { applicationId } = req.params;
-  const { status } = req.body;
-
-  const recruiterId = req.user.id;
-
-  const application = await updateApplicationStatusService(
-    applicationId,
-    recruiterId,
-    status
+  const app = await updateApplicationStatusService(
+    req.params.applicationId,
+    req.user._id,
+    req.body.status,
   );
 
-  res.status(200).json({
-    success: true,
-    message: "Application status updated",
-    application,
-  });
+  res.json(new ApiResponse(200, "Status updated", app));
+});
+
+export const withdrawApplication = asyncHandler(async (req, res) => {
+  await withdrawApplicationService(req.params.applicationId, req.user._id);
+
+  res.json(new ApiResponse(200, "Application withdrawn"));
 });

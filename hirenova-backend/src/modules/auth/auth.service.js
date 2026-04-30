@@ -1,16 +1,16 @@
 import User from "../user/user.model.js";
-import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import { ApiError } from "../../utils/apiError.js";
-
-const generateToken = (user) => {
-  return jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, {
-    expiresIn: "1d",
-  });
-};
+import { generateToken } from "../../utils/token.util.js";
 
 export const registerUserService = async (data) => {
-  const exists = await User.findOne({ email: data.email });
+  if (!data.password) {
+    throw new ApiError(400, "Password is required");
+  }
+
+  const email = data.email.toLowerCase();
+
+  const exists = await User.findOne({ email });
 
   if (exists) {
     throw new ApiError(409, "User already exists");
@@ -19,8 +19,10 @@ export const registerUserService = async (data) => {
   const hashedPassword = await bcrypt.hash(data.password, 10);
 
   const user = await User.create({
-    ...data,
+    name: data.name,
+    email,
     password: hashedPassword,
+    role: data.role || "user",
   });
 
   const userObj = user.toObject();
@@ -30,10 +32,16 @@ export const registerUserService = async (data) => {
 };
 
 export const loginUserService = async (data) => {
-  const user = await User.findOne({ email: data.email });
+  const email = data.email.toLowerCase();
+
+  const user = await User.findOne({ email: data.email }).select("+password");
 
   if (!user) {
     throw new ApiError(401, "Invalid email or password");
+  }
+
+  if (!data.password || !user.password) {
+    throw new ApiError(500, "Password missing");
   }
 
   const isMatch = await bcrypt.compare(data.password, user.password);
@@ -44,8 +52,8 @@ export const loginUserService = async (data) => {
 
   const token = generateToken(user);
 
-  const userOjb = user.toObject();
-  delete userOjb.password;
+  const userObj = user.toObject();
+  delete userObj.password;
 
-  return { user: userOjb, token };
+  return { user: userObj, token };
 };

@@ -16,7 +16,7 @@ export const loginController = asyncHandler(async (req, res) => {
 
   res.cookie("token", token, {
     ...cookieOptions,
-    maxAge: 15 * 60 * 1000, // 15 min
+    maxAge: 15 * 60 * 1000,
   });
 
   res.status(200).json(new ApiResponse(200, "User login successfully", user));

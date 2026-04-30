@@ -34,10 +34,14 @@ export const registerUserService = async (data) => {
 export const loginUserService = async (data) => {
   const email = data.email.toLowerCase();
 
-  const user = await User.findOne({ email });
+  const user = await User.findOne({ email: data.email }).select("+password");
 
   if (!user) {
     throw new ApiError(401, "Invalid email or password");
+  }
+
+  if (!data.password || !user.password) {
+    throw new ApiError(500, "Password missing");
   }
 
   const isMatch = await bcrypt.compare(data.password, user.password);

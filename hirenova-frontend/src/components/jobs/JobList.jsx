@@ -1,26 +1,13 @@
-import { useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { getJobs } from "../../features/jobs/jobSlice";
 import JobCard from "./JobCard";
 
-const JobList = ({ jobs, limit }) => {
-  const dispatch = useDispatch();
-  const jobState = useSelector((state) => state.jobs);
-
-  // 👇 Home page ke liye auto fetch
-  useEffect(() => {
-    if (!jobs) {
-      dispatch(getJobs({ page: 1 }));
-    }
-  }, [dispatch]);
-
-  const displayJobs = jobs || jobState.jobs;
-
-  const finalJobs = limit ? displayJobs.slice(0, limit) : displayJobs;
+const JobList = ({ jobs = [] }) => {
+  if (!jobs.length) {
+    return <p className="text-center text-gray-500">No jobs found</p>;
+  }
 
   return (
-    <div className="grid gap-4">
-      {finalJobs.map((job) => (
+    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {jobs.map((job) => (
         <JobCard key={job._id} job={job} />
       ))}
     </div>

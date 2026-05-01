@@ -35,6 +35,11 @@ const jobSchema = new mongoose.Schema(
 
     skills: [String],
 
+    experience: {
+      min: { type: Number, default: 0 },
+      max: { type: Number, default: 1 },
+    },
+
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
@@ -45,8 +50,17 @@ const jobSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+
+    isDeleted: { type: Boolean, default: false },
+    deletedAt: { type: Date },
+
+    status: {
+      type: String,
+      enum: ["active", "closed"],
+      default: "active",
+    },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 export default mongoose.model("Job", jobSchema);

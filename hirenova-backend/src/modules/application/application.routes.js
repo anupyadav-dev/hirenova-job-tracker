@@ -13,7 +13,7 @@ const router = express.Router();
 
 router.post("/apply/:jobId", protect, authorize("user"), applyJob);
 
-router.get("/my", protect, authorize("user"), getMyApplications);
+router.get("/my-applications", protect, authorize("user"), getMyApplications);
 
 router.delete(
   "/:applicationId",

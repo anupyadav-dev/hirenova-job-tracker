@@ -1,9 +1,18 @@
 import { useState } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { registerUser } from "../../features/auth/authSlice";
+import { useNavigate, Link } from "react-router-dom";
+import { toast } from "react-toastify";
 
-const Register = () => {
+import Card from "../../components/ui/Card";
+import Input from "../../components/common/Input";
+import Button from "../../components/common/Button";
+
+function Register() {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const { loading } = useSelector((state) => state.auth);
 
   const [form, setForm] = useState({
     name: "",
@@ -12,58 +21,75 @@ const Register = () => {
     role: "user",
   });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    dispatch(registerUser(form));
+
+    if (!form.name || !form.email || !form.password) {
+      return toast.error("All fields are required");
+    }
+
+    try {
+      await dispatch(registerUser(form)).unwrap();
+
+      toast.success("Account created successfully");
+
+      navigate("/login");
+    } catch (err) {
+      toast.error(err || "Register failed");
+    }
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-100">
-      <form
-        className="p-12 shadow-xl rounded-2xl w-[420px] min-h-[520px] bg-white flex flex-col justify-center space-y-4"
-        onSubmit={handleSubmit}
-      >
-        <h2 className="text-2xl font-semibold text-center mb-2">
-          Create Account
-        </h2>
+    <div className="min-h-screen flex items-center justify-center bg-gray-100">
+      <Card>
+        <h2 className="text-2xl font-bold text-center mb-6">Create Account</h2>
 
-        <input
-          placeholder="Name"
-          name={form.name}
-          className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"
-          onChange={(e) => setForm({ ...form, name: e.target.value })}
-        />
+        <form onSubmit={handleSubmit}>
+          <Input
+            label="Name"
+            value={form.name}
+            onChange={(e) => setForm({ ...form, name: e.target.value })}
+          />
 
-        <input
-          type="email"
-          placeholder="Email"
-          name={form.email}
-          className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"
-          onChange={(e) => setForm({ ...form, email: e.target.value })}
-        />
+          <Input
+            label="Email"
+            type="email"
+            value={form.email}
+            onChange={(e) => setForm({ ...form, email: e.target.value })}
+          />
 
-        <input
-          type="password"
-          name={form.password}
-          placeholder="Password"
-          className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"
-          onChange={(e) => setForm({ ...form, password: e.target.value })}
-        />
+          <Input
+            label="Password"
+            type="password"
+            value={form.password}
+            onChange={(e) => setForm({ ...form, password: e.target.value })}
+          />
 
-        <select
-          className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"
-          onChange={(e) => setForm({ ...form, role: e.target.value })}
-        >
-          <option value="user">User</option>
-          <option value="recruiter">Recruiter</option>
-        </select>
+          {/* Role Select */}
+          <div className="mb-4">
+            <label className="text-sm block mb-1">Role</label>
+            <select
+              value={form.role}
+              onChange={(e) => setForm({ ...form, role: e.target.value })}
+              className="w-full border border-gray-300 p-2 rounded-lg"
+            >
+              <option value="user">User</option>
+              <option value="recruiter">Recruiter</option>
+            </select>
+          </div>
 
-        <button className="bg-green-500 hover:bg-green-600 transition text-white w-full p-3 rounded-lg text-lg">
-          Register
-        </button>
-      </form>
+          <Button loading={loading}>Register</Button>
+
+          <p className="text-sm mt-4 text-center">
+            Already have an account?{" "}
+            <Link to="/login" className="text-blue-600 font-medium">
+              Login
+            </Link>
+          </p>
+        </form>
+      </Card>
     </div>
   );
-};
+}
 
 export default Register;

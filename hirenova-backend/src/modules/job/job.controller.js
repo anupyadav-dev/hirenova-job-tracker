@@ -18,7 +18,7 @@ export const createJob = asyncHandler(async (req, res) => {
 });
 
 export const getMyJobs = asyncHandler(async (req, res) => {
-  const jobs = await getMyJobsService(req.user._id);
+  const jobs = await getMyJobsService(req.user._id, req.query);
 
   res.json(new ApiResponse(200, "Jobs fetched", jobs));
 });

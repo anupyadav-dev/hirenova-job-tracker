@@ -1,13 +1,13 @@
-const Button = ({ children, loading, ...props }) => {
+function Button({ children, loading, className = "", ...props }) {
   return (
     <button
       {...props}
       disabled={loading}
-      className="bg-blue-500 text-white px-4 py-2 rounded disabled:opacity-50"
+      className={`w-full py-2 rounded-lg text-white bg-blue-600 hover:bg-blue-700 transition ${className}`}
     >
       {loading ? "Please wait..." : children}
     </button>
   );
-};
+}
 
 export default Button;

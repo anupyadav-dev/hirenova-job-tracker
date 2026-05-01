@@ -9,8 +9,47 @@ export const createJobService = async (data, userId) => {
   });
 };
 
-export const getMyJobsService = async (userId) => {
-  return await Job.find({ createdBy: userId }).sort({ createdAt: -1 });
+export const getMyJobsService = async (userId, query) => {
+  let { page = 1, limit = 6, keyword = "", location = "", status } = query;
+
+  page = Number(page) || 1;
+  limit = Number(limit) || 6;
+
+  const filter = {
+    createdBy: userId,
+  };
+
+  if (keyword) {
+    filter.title = { $regex: keyword, $options: "i" };
+  }
+
+  if (location) {
+    filter.location = { $regex: location, $options: "i" };
+  }
+
+  if (status) {
+    filter.status = status; // active / closed
+  }
+
+  const total = await Job.countDocuments(filter);
+
+  const pages = Math.ceil(total / limit) || 1;
+
+  const safePage = Math.min(Math.max(page, 1), pages);
+
+  const skip = (safePage - 1) * limit;
+
+  const jobs = await Job.find(filter)
+    .sort({ createdAt: -1 })
+    .skip(skip)
+    .limit(limit);
+
+  return {
+    jobs,
+    page: Number(safePage),
+    pages,
+    total,
+  };
 };
 
 export const updateJobService = async (jobId, userId, data) => {
@@ -34,11 +73,22 @@ export const deleteJobService = async (jobId, userId) => {
 
   if (!job) throw new ApiError(404, "Job not found");
 
+  if (job.isDeleted) {
+    throw new ApiError(400, "Job already deleted");
+  }
+
   if (job.createdBy.toString() !== userId.toString()) {
     throw new ApiError(403, "Not authorized to delete this job");
   }
 
-  await job.deleteOne();
+  job.isDeleted = true;
+  job.status = "closed";
+  job.isActive = false;
+  job.deletedAt = new Date();
+
+  await job.save();
+
+  return job;
 };
 
 export const getJobByIdService = async (jobId) => {

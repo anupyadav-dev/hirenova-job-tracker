@@ -13,16 +13,16 @@ export const getJobs = createAsyncThunk(
       const { keyword = "", location = "", page = 1 } = params;
 
       const res = await axios.get(
-        `${API}?keyword=${keyword}&location=${location}&page=${page}`
+        `${API}?keyword=${keyword}&location=${location}&page=${page}`,
       );
 
-      return res.data;
+      return res.data.data;
     } catch (err) {
       return thunkAPI.rejectWithValue(
-        err.response?.data?.message || "Failed to fetch jobs"
+        err.response?.data?.message || "Failed to fetch jobs",
       );
     }
-  }
+  },
 );
 
 // ================= RECOMMENDED =================
@@ -36,10 +36,10 @@ export const getRecommendedJobs = createAsyncThunk(
       return res.data;
     } catch (err) {
       return thunkAPI.rejectWithValue(
-        err.response?.data?.message || "Failed to fetch recommended jobs"
+        err.response?.data?.message || "Failed to fetch recommended jobs",
       );
     }
-  }
+  },
 );
 
 // ================= RECRUITER =================
@@ -47,16 +47,19 @@ export const getRecommendedJobs = createAsyncThunk(
 // 🔥 Get My Jobs
 export const getMyJobs = createAsyncThunk(
   "jobs/getMyJobs",
-  async (_, thunkAPI) => {
+  async (params = {}, thunkAPI) => {
     try {
-      const res = await axios.get(`${API}/my-jobs`);
-      return res.data;
-    } catch (err) {
-      return thunkAPI.rejectWithValue(
-        err.response?.data?.message || "Failed to fetch my jobs"
+      const { page = 1, keyword = "", location = "", status = "" } = params;
+
+      const res = await axios.get(
+        `/jobs/my/jobs?page=${page}&keyword=${keyword}&location=${location}&status=${status}`,
       );
+
+      return res.data.data;
+    } catch (err) {
+      return thunkAPI.rejectWithValue(err.response?.data?.message || "Failed");
     }
-  }
+  },
 );
 
 // 🔥 Create Job
@@ -68,10 +71,10 @@ export const createJob = createAsyncThunk(
       return res.data;
     } catch (err) {
       return thunkAPI.rejectWithValue(
-        err.response?.data?.message || "Failed to create job"
+        err.response?.data?.message || "Failed to create job",
       );
     }
-  }
+  },
 );
 
 // 🔥 Delete Job
@@ -83,10 +86,10 @@ export const deleteJob = createAsyncThunk(
       return id;
     } catch (err) {
       return thunkAPI.rejectWithValue(
-        err.response?.data?.message || "Failed to delete job"
+        err.response?.data?.message || "Failed to delete job",
       );
     }
-  }
+  },
 );
 
 // ================= SLICE =================
@@ -94,19 +97,25 @@ export const deleteJob = createAsyncThunk(
 const jobSlice = createSlice({
   name: "jobs",
   initialState: {
-    // 🌐 Public Jobs
+    //Public Jobs
+
     jobs: [],
     total: 0,
     page: 1,
     pages: 1,
 
-    // 🔥 Recommended Jobs
+    //Recommended Jobs
     recommendedJobs: [],
 
-    // 🧑‍💼 Recruiter Jobs
-    myJobs: [],
+    // Recruiter Jobs
 
-    // ⚙️ Common State
+    myJobs: [],
+    myJobsPage: 1,
+    myJobsPages: 1,
+    myJobsHasMore: true,
+
+    //Common State
+
     loading: false,
     error: null,
     success: false,
@@ -158,7 +167,9 @@ const jobSlice = createSlice({
       })
       .addCase(getMyJobs.fulfilled, (state, action) => {
         state.loading = false;
-        state.jobs = action.payload.jobs;
+        state.myJobs = action.payload.jobs;
+        state.myJobsPage = action.payload.page;
+        state.myJobsPages = action.payload.pages;
       })
       .addCase(getMyJobs.rejected, (state, action) => {
         state.loading = false;
@@ -173,7 +184,6 @@ const jobSlice = createSlice({
         state.loading = false;
         state.success = true;
 
-        // 🔥 instant UI update
         state.myJobs.unshift(action.payload);
       })
       .addCase(createJob.rejected, (state, action) => {
@@ -182,8 +192,16 @@ const jobSlice = createSlice({
       })
 
       // ================= DELETE JOB =================
+      .addCase(deleteJob.pending, (state) => {
+        state.loading = true;
+      })
       .addCase(deleteJob.fulfilled, (state, action) => {
+        state.loading = false;
         state.myJobs = state.myJobs.filter((job) => job._id !== action.payload);
+      })
+      .addCase(deleteJob.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
       });
   },
 });

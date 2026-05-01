@@ -1,22 +1,26 @@
 import { useState } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { loginUser } from "../../features/auth/authSlice";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 import { toast } from "react-toastify";
 
-const Login = () => {
+import Card from "../../components/ui/Card";
+import Input from "../../components/common/Input";
+import Button from "../../components/common/Button";
+
+function Login() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
 
-  const page = location.state?.from || "/";
+  const redirectPath = location.state?.from || "/";
+
+  const { loading } = useSelector((state) => state.auth);
 
   const [form, setForm] = useState({
     email: "",
     password: "",
   });
-
-  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -26,61 +30,58 @@ const Login = () => {
     }
 
     try {
-      setLoading(true);
-
       const res = await dispatch(loginUser(form)).unwrap();
 
-      toast.success("Login successful ");
+      toast.success("Login successful");
 
-      if (res.data.role === "recruiter") {
+      const role = res.role;
+
+      if (role === "recruiter") {
         navigate("/recruiter/dashboard");
-      } else if (res.data.role === "admin") {
+      } else if (role === "admin") {
         navigate("/admin/dashboard");
       } else {
-        navigate(page);
+        navigate(redirectPath);
       }
     } catch (err) {
-      toast.error(err);
-    } finally {
-      setLoading(false);
+      toast.error(err || "Login failed");
     }
   };
 
   return (
-    <div className="flex justify-center items-center h-screen">
-      <form
-        onSubmit={handleSubmit}
-        className="p-12 shadow-xl rounded-2xl w-[400px] min-h-[450px] bg-white flex flex-col justify-center space-y-5"
-      >
-        <h2 className="text-2xl font-semibold text-center">Login</h2>
+    <div className="min-h-screen flex items-center justify-center bg-gray-100">
+      <Card>
+        <h2 className="text-2xl font-bold text-center mb-6">
+          Login to Hirenova
+        </h2>
 
-        <input
-          type="email"
-          placeholder="Email"
-          value={form.email}
-          className="w-full p-3 border rounded-lg"
-          onChange={(e) => setForm({ ...form, email: e.target.value })}
-        />
+        <form onSubmit={handleSubmit}>
+          <Input
+            label="Email"
+            type="email"
+            value={form.email}
+            onChange={(e) => setForm({ ...form, email: e.target.value })}
+          />
 
-        <input
-          type="password"
-          placeholder="Password"
-          va={form.password}
-          className="w-full p-3 border rounded-lg"
-          onChange={(e) => setForm({ ...form, password: e.target.value })}
-        />
+          <Input
+            label="Password"
+            type="password"
+            value={form.password}
+            onChange={(e) => setForm({ ...form, password: e.target.value })}
+          />
 
-        <button
-          disabled={loading}
-          className={`w-full p-3 rounded-lg text-white ${
-            loading ? "bg-blue-300" : "bg-blue-500 hover:bg-blue-600"
-          }`}
-        >
-          {loading ? "Logging in..." : "Login"}
-        </button>
-      </form>
+          <Button loading={loading}>Login</Button>
+
+          <p className="text-sm mt-4 text-center">
+            Don’t have an account?{" "}
+            <Link to="/register" className="text-blue-600 font-medium">
+              Register
+            </Link>
+          </p>
+        </form>
+      </Card>
     </div>
   );
-};
+}
 
 export default Login;

@@ -1,53 +1,106 @@
-# 🚀 HireNova – Job Portal & Job Tracker Platform
+# 🚀 HireNova – Scalable Job Portal & Job Tracking Platform
 
-HireNova is a full-stack Job Portal platform built using the MERN stack.
-It enables **job seekers to discover and apply for jobs**, while **recruiters can create and manage job postings** efficiently.
+HireNova is a **full-stack MERN Job Portal** that connects job seekers and recruiters through a secure, scalable, and production-ready platform.
 
-This project is designed using **production-level backend architecture** with scalability and maintainability in mind.
+It is designed with **real-world backend architecture, role-based access control, and performance-focused features**, making it more than just a basic CRUD application.
 
 ---
 
-## 🧠 Key Highlights
+## 🌟 Key Highlights
 
-* Role-Based Access Control (RBAC) with 3 roles: **User, Recruiter, Admin**
-* Scalable layered backend architecture
-* Secure authentication using **JWT + Password Hashing**
-* Clean and modular code structure
+- 🔐 Secure Authentication using JWT & Password Hashing
+- 🧠 Role-Based Access Control (User, Recruiter, Admin)
+- 🏗️ Production-level layered backend architecture
+- ⚡ Optimized APIs with filtering, search & pagination
+- 💼 Complete job & application management system
+- 📊 Admin & Recruiter dashboards
+- 🔄 Full frontend-backend integration (MERN)
 
 ---
 
 ## 🛠️ Tech Stack
 
-### Frontend (In Progress)
+### 💻 Frontend
 
-* React.js
-* Tailwind CSS
+- React.js
+- Tailwind CSS
 
-### Backend
+### ⚙️ Backend
 
-* Node.js
-* Express.js
-* MongoDB
-* JWT Authentication
+- Node.js
+- Express.js
+- MongoDB
+- JWT Authentication
 
-### Tools
+### 🧰 Tools
 
-* Postman
-* Git & GitHub
+- Git & GitHub
+- Postman
 
 ---
 
-## 🏗️ Backend Architecture
+## 🏗️ Architecture (Scalable Design)
 
 The backend follows a **layered architecture pattern**:
 
 Route → Controller → Service → Model → Database
 
-This ensures:
+### ✅ Benefits:
 
-* Clean separation of concerns
-* Easy scalability
-* Maintainable codebase
+- Clean and maintainable codebase
+- Easy scalability
+- Better debugging and testing
+
+---
+
+## 🔐 Authentication & Authorization
+
+- User Registration & Login
+- Secure password hashing
+- JWT-based authentication
+- Role-Based Access Control (RBAC)
+
+### 👥 Roles:
+
+- User (Job Seeker)
+- Recruiter
+- Admin
+
+---
+
+## 💼 Features
+
+### 👤 User (Job Seeker)
+
+- Browse all jobs
+- Advanced job search
+- Apply for jobs
+- Track applications
+
+---
+
+### 🧑‍💼 Recruiter
+
+- Create and manage job postings
+- View applicants
+- Manage job listings
+
+---
+
+### 🛡️ Admin
+
+- Manage users
+- Manage job listings
+- Platform-level control
+
+---
+
+## 🔍 Advanced Features
+
+- 🔎 Job Search (keyword-based)
+- 🎯 Filtering (role, location, etc.)
+- 📄 Pagination for performance optimization
+- 🔐 Secure API handling & validation
 
 ---
 
@@ -55,108 +108,72 @@ This ensures:
 
 ```
 src/
- ├── controllers
- ├── services
- ├── models
- ├── routes
- ├── middleware
- ├── utils
- └── config
-```
-
----
-
-## 🔐 Features Implemented
-
-### Authentication Module
-
-* User Registration & Login
-* Password Hashing
-* JWT Authentication
-* Role-Based Authorization (RBAC)
-
-### Roles Supported
-
-* User (Job Seeker)
-* Recruiter
-* Admin
-
----
-
-### 💼 Job Module
-
-**Recruiters can:**
-
-* Create jobs
-* Delete jobs
-
-**Users can:**
-
-* View all jobs
-* View job details
-
----
-
-### 📄 Application Module
-
-**Users can:**
-
-* Apply for jobs
-* View their applications
-
-**Recruiters can:**
-
-* View applicants for a job
-
----
-
-## 🗄️ Database Design
-
-```
-User → creates → Job  
-User → applies → Job via Application
+ ├── controllers     # Handles request/response
+ ├── services        # Business logic layer
+ ├── models          # Database schemas
+ ├── routes          # API routes
+ ├── middleware      # Auth & validation
+ ├── utils           # Helper functions
+ └── config          # Database & environment setup
 ```
 
 ---
 
 ## 🔗 API Endpoints
 
-### Auth APIs
+### 🔐 Auth APIs
 
-* POST /api/auth/register
-* POST /api/auth/login
-
-### Job APIs
-
-* GET /api/jobs
-* GET /api/jobs/:id
-* POST /api/jobs
-* DELETE /api/jobs/:id
-
-### Application APIs
-
-* POST /api/applications/apply/:jobId
-* GET /api/applications/my-applications
-* GET /api/applications/job/:jobId
+POST /api/auth/register
+POST /api/auth/login
 
 ---
 
-## 🚧 Project Status
+### 💼 Job APIs
 
-* Backend: ✅ Completed
-* Frontend: 🚧 In Progress
-* Deployment: 🔜 Coming Soon
+GET /api/jobs
+GET /api/jobs/:id
+POST /api/jobs
+DELETE /api/jobs/:id
 
 ---
 
-## 🔮 Upcoming Features
+### 📄 Application APIs
 
-* Job search
-* Filtering & Pagination
-* Admin Dashboard
-* Recruiter Dashboard
-* Full frontend integration
-* Deployment
+POST /api/applications/apply/:jobId
+GET /api/applications/my-applications
+GET /api/applications/job/:jobId
+
+---
+
+## 🗄️ Database Design
+
+User → creates → Job
+User → applies → Job via Application
+
+---
+
+## 🚀 Project Status
+
+| Module     | Status         |
+| ---------- | -------------- |
+| Backend    | ✅ Completed   |
+| Frontend   | ✅ Completed   |
+| UI/UX      | 🎨 Polishing   |
+| Deployment | 🔜 Coming Soon |
+
+---
+
+## 🌐 Future Improvements
+
+- UI/UX Enhancements
+- Performance Optimization (Caching, etc.)
+- Deployment on Cloud (AWS / Render)
+
+---
+
+## 📸 Screenshots
+
+> (Add UI screenshots here after polishing to boost impact)
 
 ---
 
@@ -167,3 +184,5 @@ Full Stack Developer (MERN)
 
 🔗 LinkedIn: https://www.linkedin.com/in/anup2002/
 🔗 GitHub: https://github.com/anupyadav-dev
+
+---

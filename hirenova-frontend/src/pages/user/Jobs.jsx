@@ -15,7 +15,7 @@ import EmptyState from "../../components/common/EmptyState";
 const Jobs = () => {
   const dispatch = useDispatch();
   const { jobs, loading, page, pages, error } = useSelector(
-    (state) => state.jobs
+    (state) => state.jobs,
   );
 
   const [keyword, setKeyword] = useState("");
@@ -42,18 +42,22 @@ const Jobs = () => {
 
       {loading ? (
         <Loader />
-      ) : !jobs || jobs.length === 0 ? (
-        <EmptyState message="No jobs found" />
       ) : (
         <>
-          <JobList jobs={jobs} />
-          <Pagination
-            page={page}
-            pages={pages}
-            onPageChange={(newPage) =>
-              dispatch(getJobs({ keyword, location, page: newPage }))
-            }
-          />
+          {jobs && jobs.length > 0 ? (
+            <>
+              <JobList jobs={jobs} />
+              <Pagination
+                page={page}
+                pages={pages}
+                onPageChange={(newPage) =>
+                  dispatch(getJobs({ keyword, location, page: newPage }))
+                }
+              />
+            </>
+          ) : (
+            <EmptyState message="No jobs found" />
+          )}
         </>
       )}
     </div>

@@ -8,7 +8,7 @@ export const getMyApplications = createAsyncThunk(
   async (_, thunkAPI) => {
     try {
       const res = await axios.get("/applications/my-applications");
-      return res.data;
+      return res.data.data;
     } catch (err) {
       return thunkAPI.rejectWithValue(err.response.data.message);
     }
@@ -87,7 +87,7 @@ const applicationSlice = createSlice({
       })
       .addCase(getMyApplications.fulfilled, (state, action) => {
         state.loading = false;
-        state.applications = action.payload.applications;
+        state.applications = action.payload;
       })
       .addCase(getMyApplications.rejected, (state, action) => {
         state.loading = false;

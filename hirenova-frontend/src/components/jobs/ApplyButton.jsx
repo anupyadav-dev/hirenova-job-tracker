@@ -1,62 +1,67 @@
-import { useState } from "react";
-import axios from "../../api/axios";
+import { useDispatch, useSelector } from "react-redux";
+import { applyJob } from "../../features/applications/applicationSlice";
 import { toast } from "react-toastify";
-import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 
-const ApplyButton = ({ jobId, alreadyApplied = false }) => {
-  const { user } = useSelector((state) => state.auth);
+const ApplyButton = ({ jobId }) => {
+  const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const [applied, setApplied] = useState(alreadyApplied);
-  const [loading, setLoading] = useState(false);
+  const { user } = useSelector((state) => state.auth);
+
+  // 🔥 safer selector (from applicationSlice)
+  const { applications = [], applying } = useSelector(
+    (state) => state.applications,
+  );
+
+  const [localLoading, setLocalLoading] = useState(false);
+
+  const applied = applications.some(
+    (app) => app.job === jobId || app.jobId === jobId,
+  );
 
   const handleApply = async () => {
-    // 🔹 Prevent multiple clicks
-    if (loading || applied) return;
-
-    // 🔹 Not logged in
     if (!user) {
       toast.info("Please login to apply");
-      navigate("/login", { state: { from: `/jobs/${jobId}` } });
-      return;
+      return navigate("/login", { state: { from: `/jobs/${jobId}` } });
     }
+
+    if (applied || applying || localLoading) return;
 
     try {
-      setLoading(true);
+      setLocalLoading(true);
 
-      await axios.post(`/applications/apply/${jobId}`);
+      await dispatch(applyJob(jobId)).unwrap();
 
-      setApplied(true);
-      toast.success("Application submitted successfully 🚀");
+      toast.success("Applied successfully 🚀");
     } catch (err) {
-      const message =
-        err.response?.data?.message || "Failed to apply. Try again.";
-      toast.error(message);
+      toast.error(err || "Failed to apply");
     } finally {
-      setLoading(false);
+      setLocalLoading(false);
     }
   };
+
+  const isDisabled = applied || applying || localLoading;
 
   return (
     <button
       onClick={handleApply}
-      disabled={applied || loading}
-      className={`w-full sm:w-auto px-5 py-2.5 mt-4 text-white rounded-lg font-medium
-        transition-all duration-200 flex items-center justify-center gap-2
+      disabled={isDisabled}
+      className={`px-5 py-2 rounded font-medium text-white transition-all duration-200
         ${
           applied
             ? "bg-gray-400 cursor-not-allowed"
-            : loading
-            ? "bg-green-400"
-            : "bg-green-500 hover:bg-green-600 active:scale-95"
+            : isDisabled
+              ? "bg-green-400"
+              : "bg-green-500 hover:bg-green-600 active:scale-95"
         }`}
     >
-      {loading && (
-        <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-      )}
-
-      {loading ? "Applying..." : applied ? "Already Applied" : "Apply Now"}
+      {localLoading || applying
+        ? "Applying..."
+        : applied
+          ? "Already Applied"
+          : "Apply Now"}
     </button>
   );
 };

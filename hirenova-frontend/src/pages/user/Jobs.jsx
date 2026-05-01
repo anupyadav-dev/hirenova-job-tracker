@@ -14,7 +14,7 @@ import EmptyState from "../../components/common/EmptyState";
 
 const Jobs = () => {
   const dispatch = useDispatch();
-  const { jobs, loading, page, pages, error } = useSelector(
+  const { jobs, loading, total, page, pages, error } = useSelector(
     (state) => state.jobs,
   );
 
@@ -32,6 +32,7 @@ const Jobs = () => {
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-4">Find Jobs</h1>
+      <p className="text-sm text-gray-500 mb-4">{total} jobs found</p>
 
       <SearchBar
         keyword={keyword}

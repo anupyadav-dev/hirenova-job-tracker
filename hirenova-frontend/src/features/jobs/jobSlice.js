@@ -25,6 +25,20 @@ export const getJobs = createAsyncThunk(
   },
 );
 
+export const getJobById = createAsyncThunk(
+  "jobs/getJobById",
+  async (id, { rejectWithValue }) => {
+    try {
+      const res = await axios.get(`/jobs/${id}`);
+      return res.data;
+    } catch (err) {
+      return rejectWithValue(
+        err.response?.data?.message || "Failed to fetch job",
+      );
+    }
+  },
+);
+
 // ================= RECOMMENDED =================
 
 // 🔥 Get Recommended Jobs
@@ -103,6 +117,7 @@ const jobSlice = createSlice({
     total: 0,
     page: 1,
     pages: 1,
+    job: null,
 
     //Recommended Jobs
     recommendedJobs: [],
@@ -144,6 +159,19 @@ const jobSlice = createSlice({
         state.pages = action.payload.pages;
       })
       .addCase(getJobs.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+
+      .addCase(getJobById.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(getJobById.fulfilled, (state, action) => {
+        state.loading = false;
+        state.job = action.payload.data;
+      })
+      .addCase(getJobById.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       })

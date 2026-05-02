@@ -37,7 +37,7 @@ export const getApplicants = createAsyncThunk(
   async (jobId, thunkAPI) => {
     try {
       const res = await axios.get(`/applications/job/${jobId}`);
-      return res.data;
+      return res.data.data;
     } catch (err) {
       return thunkAPI.rejectWithValue(
         err.response?.data?.message || "Failed to fetch applicants",
@@ -116,7 +116,7 @@ const applicationSlice = createSlice({
       })
       .addCase(getApplicants.fulfilled, (state, action) => {
         state.loading = false;
-        state.applicants = action.payload.applicants || [];
+        state.applicants = action.payload;
       })
       .addCase(getApplicants.rejected, (state, action) => {
         state.loading = false;

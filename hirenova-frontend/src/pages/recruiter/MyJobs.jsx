@@ -4,9 +4,12 @@ import { getMyJobs, deleteJob } from "../../features/jobs/jobSlice";
 import { useNavigate } from "react-router-dom";
 import useDebounce from "../../hooks/useDebounce";
 import { toast } from "react-toastify";
+
 import Loader from "../../components/common/Loader";
 import EmptyState from "../../components/common/EmptyState";
 import Pagination from "../../components/jobs/Pagination";
+import JobList from "../../components/jobs/JobList";
+import JobActions from "../../components/jobs/JobActions";
 
 const MyJobs = () => {
   const dispatch = useDispatch();
@@ -25,7 +28,7 @@ const MyJobs = () => {
   const debouncedKeyword = useDebounce(filters.keyword, 500);
   const debouncedLocation = useDebounce(filters.location, 500);
 
-  // 🔥 ONLY filters change → reset page to 1
+  // 🔥 Fetch jobs
   useEffect(() => {
     dispatch(
       getMyJobs({
@@ -38,16 +41,17 @@ const MyJobs = () => {
   }, [dispatch, debouncedKeyword, debouncedLocation, filters.status]);
 
   const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this job?")) return;
+    if (!window.confirm("Are you sure?")) return;
 
     try {
       await dispatch(deleteJob(id)).unwrap();
-      toast.success("Job deleted successfully");
+      toast.success("Job deleted");
 
-      // 🔥 refetch current page
       dispatch(
         getMyJobs({
-          ...filters,
+          keyword: debouncedKeyword,
+          location: debouncedLocation,
+          status: filters.status,
           page: myJobsPage,
         }),
       );
@@ -74,21 +78,20 @@ const MyJobs = () => {
   return (
     <div className="p-6 max-w-6xl mx-auto">
       {/* HEADER */}
-      <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-3">
+      <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">My Jobs</h1>
 
         <button
           onClick={() => navigate("/recruiter/create-job")}
-          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 w-full md:w-auto"
+          className="bg-blue-600 text-white px-4 py-2 rounded"
         >
           + Create Job
         </button>
       </div>
 
       {/* FILTERS */}
-      <div className="bg-white p-4 rounded shadow mb-6 grid grid-cols-1 md:grid-cols-2 gap-3">
+      <div className="grid md:grid-cols-2 gap-3 mb-6">
         <input
-          type="text"
           placeholder="Search title..."
           value={filters.keyword}
           onChange={(e) => setFilters({ ...filters, keyword: e.target.value })}
@@ -96,7 +99,6 @@ const MyJobs = () => {
         />
 
         <input
-          type="text"
           placeholder="Location..."
           value={filters.location}
           onChange={(e) => setFilters({ ...filters, location: e.target.value })}
@@ -105,12 +107,12 @@ const MyJobs = () => {
       </div>
 
       {/* TABS */}
-      <div className="flex gap-4 mb-6">
+      <div className="flex gap-3 mb-6">
         {["", "active", "closed"].map((tab) => (
           <button
             key={tab}
             onClick={() => setFilters({ ...filters, status: tab })}
-            className={`px-4 py-2 rounded ${
+            className={`px-3 py-1 rounded ${
               filters.status === tab ? "bg-blue-600 text-white" : "bg-gray-200"
             }`}
           >
@@ -119,74 +121,26 @@ const MyJobs = () => {
         ))}
       </div>
 
+      {/* CONTENT */}
       {loading ? (
         <Loader />
       ) : !myJobs || myJobs.length === 0 ? (
-        <EmptyState
-          message={
-            filters.keyword || filters.location || filters.status
-              ? "No jobs match your search"
-              : "No jobs posted yet"
-          }
-        />
+        <EmptyState message="No jobs found" />
       ) : (
         <>
-          {/* JOB LIST */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {myJobs.map((job) => (
-              <div
-                key={job._id}
-                className="border rounded-lg p-5 shadow-sm hover:shadow-md transition flex flex-col justify-between"
-              >
-                <div>
-                  <div className="flex justify-between items-start">
-                    <h2 className="text-lg font-semibold">{job.title}</h2>
-
-                    <span
-                      className={`text-xs px-2 py-1 rounded-full capitalize ${
-                        job.status === "active"
-                          ? "bg-green-100 text-green-600"
-                          : "bg-red-100 text-red-600"
-                      }`}
-                    >
-                      {job.status}
-                    </span>
-                  </div>
-
-                  <p className="text-sm text-gray-500">
-                    {job.company} • {job.location}
-                  </p>
-
-                  <p className="text-sm mt-1 text-gray-600">
-                    ₹{job.salary?.toLocaleString()} / year
-                  </p>
-                </div>
-
-                <div className="flex gap-2 mt-4">
-                  <button
-                    onClick={() => navigate(`/recruiter/applicants/${job._id}`)}
-                    className="bg-green-500 text-white px-3 py-1 rounded text-sm flex-1"
-                  >
-                    Applicants
-                  </button>
-
-                  <button
-                    onClick={() => navigate(`/recruiter/edit-job/${job._id}`)}
-                    className="bg-yellow-500 text-white px-3 py-1 rounded text-sm flex-1"
-                  >
-                    Edit
-                  </button>
-
-                  <button
-                    onClick={() => handleDelete(job._id)}
-                    className="bg-red-500 text-white px-3 py-1 rounded text-sm flex-1"
-                  >
-                    Delete
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
+          {/* 🔥 REUSABLE COMPONENT */}
+          <JobList
+            jobs={myJobs}
+            onJobClick={(job) => navigate(`/recruiter/jobs/${job._id}`)}
+            renderActions={(job) => (
+              <JobActions
+                role="recruiter"
+                job={job}
+                onDelete={handleDelete}
+                navigate={navigate}
+              />
+            )}
+          />
 
           {/* PAGINATION */}
           <Pagination

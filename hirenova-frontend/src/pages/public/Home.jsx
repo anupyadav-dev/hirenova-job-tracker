@@ -1,12 +1,15 @@
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { getJobs } from "../../features/jobs/jobSlice";
+import { useNavigate } from "react-router-dom";
 
 import RecommendedJobs from "../../components/jobs/RecommendedJobs";
 import JobList from "../../components/jobs/JobList";
 import { Link } from "react-router-dom";
+import ApplyButton from "../../components/jobs/ApplyButton";
 
 const Home = () => {
+  const navigate = useNavigate();
   const dispatch = useDispatch();
 
   const { user } = useSelector((state) => state.auth);
@@ -38,7 +41,11 @@ const Home = () => {
         </div>
 
         {/* ✅ FIX: pass jobs */}
-        <JobList jobs={jobs} />
+        <JobList
+          jobs={jobs}
+          onJobClick={(job) => navigate(`/jobs/${job._id}`)}
+          renderActions={(job) => <ApplyButton jobId={job._id} />}
+        />
       </section>
     </div>
   );

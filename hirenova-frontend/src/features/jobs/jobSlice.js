@@ -47,7 +47,7 @@ export const getRecommendedJobs = createAsyncThunk(
   async (_, thunkAPI) => {
     try {
       const res = await axios.get(`${API}/recommended`);
-      return res.data;
+      return res.data.data;
     } catch (err) {
       return thunkAPI.rejectWithValue(
         err.response?.data?.message || "Failed to fetch recommended jobs",
@@ -182,7 +182,7 @@ const jobSlice = createSlice({
       })
       .addCase(getRecommendedJobs.fulfilled, (state, action) => {
         state.loading = false;
-        state.recommendedJobs = action.payload.jobs;
+        state.recommendedJobs = action.payload;
       })
       .addCase(getRecommendedJobs.rejected, (state, action) => {
         state.loading = false;

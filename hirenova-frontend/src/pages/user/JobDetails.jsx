@@ -7,11 +7,12 @@ import { getJobById } from "../../features/jobs/jobSlice";
 import ApplyButton from "../../components/jobs/ApplyButton";
 import Loader from "../../components/common/Loader";
 import ErrorState from "../../components/common/ErrorState";
+import JobActions from "../../components/jobs/JobActions";
 
 const JobDetails = () => {
   const { id } = useParams();
   const dispatch = useDispatch();
-
+  const { user } = useSelector((state) => state.auth);
   const { job, loading, error } = useSelector((state) => state.jobs);
 
   useEffect(() => {
@@ -69,7 +70,7 @@ const JobDetails = () => {
 
           {/* APPLY BUTTON */}
           <div className="mt-5">
-            <ApplyButton jobId={job._id} />
+            <JobActions role={user?.role} job={job} />
           </div>
         </div>
 

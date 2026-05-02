@@ -100,9 +100,16 @@ const applicationSlice = createSlice({
       .addCase(applyJob.fulfilled, (state, action) => {
         state.applying = false;
 
-        // optional: push locally (instant UI)
-        if (action.payload?.application) {
-          state.applications.unshift(action.payload.application);
+        const newApp = action.payload.application || action.payload;
+
+        if (newApp) {
+          const exists = state.applications.some(
+            (app) => app.job === newApp.job || app.job?._id === newApp.job,
+          );
+
+          if (!exists) {
+            state.applications.unshift(newApp);
+          }
         }
       })
       .addCase(applyJob.rejected, (state, action) => {

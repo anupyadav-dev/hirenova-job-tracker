@@ -28,7 +28,7 @@ const Navbar = () => {
     try {
       await dispatch(logoutUser()).unwrap();
       toast.success("Logged out");
-      navigate("/login");
+      navigate("/");
     } catch {
       toast.error("Logout failed");
     }

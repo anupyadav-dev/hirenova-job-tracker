@@ -1,7 +1,9 @@
 import ApplyButton from "../jobs/ApplyButton";
 
 const JobActions = ({ role, job, onDelete, navigate }) => {
-  if (role === "recruiter") {
+  const isRecruiter = role === "recruiter";
+
+  if (isRecruiter) {
     return (
       <div className="flex gap-2">
         <button

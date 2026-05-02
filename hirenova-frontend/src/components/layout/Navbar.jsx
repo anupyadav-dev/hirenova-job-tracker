@@ -72,7 +72,7 @@ const Navbar = () => {
               to="/recruiter/create-job"
               className={isActive("/recruiter/create-job")}
             >
-              Post Job
+              Create Job
             </Link>
           </>
         )}

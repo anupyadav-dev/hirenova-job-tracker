@@ -12,7 +12,7 @@ import Pagination from "../../components/jobs/Pagination";
 import Loader from "../../components/common/Loader";
 import ErrorState from "../../components/common/ErrorState";
 import EmptyState from "../../components/common/EmptyState";
-import ApplyButton from "../../components/jobs/ApplyButton";
+import JobActions from "../../components/jobs/JobActions";
 
 const Jobs = () => {
   const navigate = useNavigate();
@@ -20,6 +20,9 @@ const Jobs = () => {
   const { jobs, loading, total, page, pages, error } = useSelector(
     (state) => state.jobs,
   );
+
+  const { user } = useSelector((state) => state.auth);
+  const role = user?.role || "guest";
 
   const [keyword, setKeyword] = useState("");
   const [location, setLocation] = useState("");
@@ -55,8 +58,9 @@ const Jobs = () => {
             <>
               <JobList
                 jobs={jobs}
-                 onJobClick={(job) => navigate(`/jobs/${job._id}`)}
-                renderActions={(job) => <ApplyButton jobId={job._id} />}
+                role={role}
+                onJobClick={(job) => navigate(`/jobs/${job._id}`)}
+                renderActions={(job) => <JobActions role={role} job={job} />}
               />
               <Pagination
                 page={page}

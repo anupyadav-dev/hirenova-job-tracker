@@ -10,7 +10,6 @@ const ApplyButton = ({ jobId }) => {
 
   const { user } = useSelector((state) => state.auth);
 
-  // 🔥 safer selector (from applicationSlice)
   const { applications = [], applying } = useSelector(
     (state) => state.applications,
   );

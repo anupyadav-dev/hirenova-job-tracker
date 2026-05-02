@@ -37,7 +37,7 @@ function Login() {
       const role = res.role;
 
       if (role === "recruiter") {
-        navigate("/");
+        navigate("/recruiter/dashboard");
       } else if (role === "admin") {
         navigate("/admin/dashboard");
       } else {

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
 import { getJobs } from "../../features/jobs/jobSlice";
 import useDebounce from "../../hooks/useDebounce";
@@ -11,27 +12,36 @@ import Pagination from "../../components/jobs/Pagination";
 import Loader from "../../components/common/Loader";
 import ErrorState from "../../components/common/ErrorState";
 import EmptyState from "../../components/common/EmptyState";
+import JobActions from "../../components/jobs/JobActions";
 
 const Jobs = () => {
+  const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { jobs, loading, page, pages, error } = useSelector(
+  const { jobs, loading, total, page, pages, error } = useSelector(
     (state) => state.jobs,
   );
+
+  const { user } = useSelector((state) => state.auth);
+  const role = user?.role || "guest";
 
   const [keyword, setKeyword] = useState("");
   const [location, setLocation] = useState("");
 
   const debouncedKeyword = useDebounce(keyword, 500);
+  const debouncedLocation = useDebounce(location, 500);
 
   useEffect(() => {
-    dispatch(getJobs({ keyword: debouncedKeyword, location, page }));
-  }, [dispatch, debouncedKeyword, location, page]);
+    dispatch(
+      getJobs({ keyword: debouncedKeyword, location: debouncedLocation, page }),
+    );
+  }, [dispatch, debouncedKeyword, debouncedLocation, page]);
 
   if (error) return <ErrorState message={error} />;
 
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-4">Find Jobs</h1>
+      <p className="text-sm text-gray-500 mb-4">{total} jobs found</p>
 
       <SearchBar
         keyword={keyword}
@@ -46,7 +56,12 @@ const Jobs = () => {
         <>
           {jobs && jobs.length > 0 ? (
             <>
-              <JobList jobs={jobs} />
+              <JobList
+                jobs={jobs}
+                role={role}
+                onJobClick={(job) => navigate(`/jobs/${job._id}`)}
+                renderActions={(job) => <JobActions role={role} job={job} />}
+              />
               <Pagination
                 page={page}
                 pages={pages}

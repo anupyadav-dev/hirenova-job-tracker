@@ -1,62 +1,88 @@
-import { useState } from "react";
-import axios from "../../api/axios";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  applyJob,
+  getMyApplications,
+} from "../../features/applications/applicationSlice";
 import { toast } from "react-toastify";
-import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 
-const ApplyButton = ({ jobId, alreadyApplied = false }) => {
-  const { user } = useSelector((state) => state.auth);
+const ApplyButton = ({ jobId }) => {
+  const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const [applied, setApplied] = useState(alreadyApplied);
-  const [loading, setLoading] = useState(false);
+  const { user } = useSelector((state) => state.auth);
+  const { applications = [], applying } = useSelector(
+    (state) => state.applications,
+  );
+
+  console.log("applications", applications);
+  console.log("jobId", jobId);
+
+  const [localLoading, setLocalLoading] = useState(false);
+
+  const applied = applications.some((app) => {
+    const appJobId =
+      app.job?._id?.toString() || app.job?.toString() || app.jobId?.toString();
+
+    return appJobId === jobId.toString();
+  });
+
+  const isGuest = !user;
+  const isLoading = applying || localLoading;
+  const isDisabled = applied || isLoading;
+  const isDisabledFinal = isGuest ? false : isDisabled;
 
   const handleApply = async () => {
-    // 🔹 Prevent multiple clicks
-    if (loading || applied) return;
-
-    // 🔹 Not logged in
-    if (!user) {
+    if (isGuest) {
       toast.info("Please login to apply");
-      navigate("/login", { state: { from: `/jobs/${jobId}` } });
-      return;
+      return navigate("/login", {
+        state: { from: `/jobs/${jobId}` },
+      });
     }
+
+    if (isDisabled) return;
 
     try {
-      setLoading(true);
+      setLocalLoading(true);
 
-      await axios.post(`/applications/apply/${jobId}`);
+      await dispatch(applyJob(jobId)).unwrap();
 
-      setApplied(true);
-      toast.success("Application submitted successfully 🚀");
+      toast.success("Applied successfully 🚀");
+
+      // background sync
+      dispatch(getMyApplications());
     } catch (err) {
-      const message =
-        err.response?.data?.message || "Failed to apply. Try again.";
-      toast.error(message);
+      toast.error(err || "Failed to apply");
     } finally {
-      setLoading(false);
+      setLocalLoading(false);
     }
   };
+
+  const buttonText = isGuest
+    ? "Login to Apply"
+    : isLoading
+      ? "Applying..."
+      : applied
+        ? "Already Applied"
+        : "Apply Now";
 
   return (
     <button
       onClick={handleApply}
-      disabled={applied || loading}
-      className={`w-full sm:w-auto px-5 py-2.5 mt-4 text-white rounded-lg font-medium
-        transition-all duration-200 flex items-center justify-center gap-2
+      disabled={isDisabledFinal}
+      className={`px-5 py-2 rounded font-medium text-white transition-all duration-200
         ${
           applied
             ? "bg-gray-400 cursor-not-allowed"
-            : loading
-            ? "bg-green-400"
-            : "bg-green-500 hover:bg-green-600 active:scale-95"
+            : isLoading
+              ? "bg-green-400"
+              : isGuest
+                ? "bg-blue-500 hover:bg-blue-600"
+                : "bg-green-500 hover:bg-green-600 active:scale-95"
         }`}
     >
-      {loading && (
-        <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-      )}
-
-      {loading ? "Applying..." : applied ? "Already Applied" : "Apply Now"}
+      {buttonText}
     </button>
   );
 };

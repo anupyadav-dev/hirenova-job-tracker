@@ -8,11 +8,25 @@ export const getMyApplications = createAsyncThunk(
   async (_, thunkAPI) => {
     try {
       const res = await axios.get("/applications/my-applications");
-      return res.data;
+      return res.data.data;
     } catch (err) {
       return thunkAPI.rejectWithValue(err.response.data.message);
     }
-  }
+  },
+);
+
+export const applyJob = createAsyncThunk(
+  "applications/applyJob",
+  async (jobId, thunkAPI) => {
+    try {
+      const res = await axios.post(`/applications/apply/${jobId}`);
+      return res.data;
+    } catch (err) {
+      return thunkAPI.rejectWithValue(
+        err.response?.data?.message || "Apply failed",
+      );
+    }
+  },
 );
 
 // ================= RECRUITER =================
@@ -23,13 +37,13 @@ export const getApplicants = createAsyncThunk(
   async (jobId, thunkAPI) => {
     try {
       const res = await axios.get(`/applications/job/${jobId}`);
-      return res.data;
+      return res.data.data;
     } catch (err) {
       return thunkAPI.rejectWithValue(
-        err.response?.data?.message || "Failed to fetch applicants"
+        err.response?.data?.message || "Failed to fetch applicants",
       );
     }
-  }
+  },
 );
 
 // 🔥 Update Application Status (accept / reject)
@@ -41,10 +55,10 @@ export const updateApplicationStatus = createAsyncThunk(
       return { id, status, data: res.data };
     } catch (err) {
       return thunkAPI.rejectWithValue(
-        err.response?.data?.message || "Failed to update status"
+        err.response?.data?.message || "Failed to update status",
       );
     }
-  }
+  },
 );
 
 // ================= SLICE =================
@@ -54,11 +68,12 @@ const applicationSlice = createSlice({
   initialState: {
     applications: [],
 
-    // 🔥 NEW (for recruiter)
+    // for recruiter)
     applicants: [],
 
     loading: false,
     error: null,
+    applying: false,
   },
 
   reducers: {},
@@ -72,10 +87,33 @@ const applicationSlice = createSlice({
       })
       .addCase(getMyApplications.fulfilled, (state, action) => {
         state.loading = false;
-        state.applications = action.payload.applications;
+        state.applications = action.payload;
       })
       .addCase(getMyApplications.rejected, (state, action) => {
         state.loading = false;
+        state.error = action.payload;
+      })
+
+      .addCase(applyJob.pending, (state) => {
+        state.applying = true;
+      })
+      .addCase(applyJob.fulfilled, (state, action) => {
+        state.applying = false;
+
+        const newApp = action.payload.application || action.payload;
+
+        if (newApp) {
+          const exists = state.applications.some(
+            (app) => app.job === newApp.job || app.job?._id === newApp.job,
+          );
+
+          if (!exists) {
+            state.applications.unshift(newApp);
+          }
+        }
+      })
+      .addCase(applyJob.rejected, (state, action) => {
+        state.applying = false;
         state.error = action.payload;
       })
 
@@ -85,7 +123,7 @@ const applicationSlice = createSlice({
       })
       .addCase(getApplicants.fulfilled, (state, action) => {
         state.loading = false;
-        state.applicants = action.payload.applicants || [];
+        state.applicants = action.payload;
       })
       .addCase(getApplicants.rejected, (state, action) => {
         state.loading = false;

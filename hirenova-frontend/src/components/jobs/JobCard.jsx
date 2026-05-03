@@ -1,24 +1,28 @@
-import { Link } from "react-router-dom";
-
-const JobCard = ({ job }) => {
+const JobCard = ({ job, onClick, actions }) => {
   return (
-    <div className="bg-white p-5 rounded-xl shadow hover:shadow-lg transition">
-      <h3 className="text-lg font-semibold">{job.title}</h3>
+    <div
+      className="border rounded-xl p-5 shadow-sm hover:shadow-lg transition bg-white"
+      onClick={onClick}
+    >
+      <div className="flex justify-between">
+        <h2 className="text-lg font-semibold">{job.title}</h2>
 
-      <p className="text-gray-600">{job.company}</p>
-
-      <p className="text-sm text-gray-500 mt-1">📍 {job.location}</p>
-
-      <div className="mt-2 text-blue-600 font-medium">
-        ₹ {job.salary || "Not disclosed"}
+        <span className="text-xs px-2 py-1 rounded-full bg-green-100 text-green-600">
+          {job.status}
+        </span>
       </div>
 
-      <Link
-        to={`/jobs/${job._id}`}
-        className="inline-block mt-3 text-sm text-blue-600 hover:underline"
-      >
-        View Details →
-      </Link>
+      <p className="text-sm text-gray-500">
+        {job.company} • {job.location}
+      </p>
+
+      <p className="text-sm mt-2 line-clamp-2">{job.description}</p>
+
+      <div className="mt-4 flex justify-between items-center">
+        <p className="font-medium">₹{job.salary?.toLocaleString()}</p>
+
+        <div onClick={(e) => e.stopPropagation()}>{actions}</div>
+      </div>
     </div>
   );
 };

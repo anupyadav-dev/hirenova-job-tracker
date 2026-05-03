@@ -25,6 +25,20 @@ export const getJobs = createAsyncThunk(
   },
 );
 
+export const getJobById = createAsyncThunk(
+  "jobs/getJobById",
+  async (id, { rejectWithValue }) => {
+    try {
+      const res = await axios.get(`/jobs/${id}`);
+      return res.data;
+    } catch (err) {
+      return rejectWithValue(
+        err.response?.data?.message || "Failed to fetch job",
+      );
+    }
+  },
+);
+
 // ================= RECOMMENDED =================
 
 // 🔥 Get Recommended Jobs
@@ -33,7 +47,7 @@ export const getRecommendedJobs = createAsyncThunk(
   async (_, thunkAPI) => {
     try {
       const res = await axios.get(`${API}/recommended`);
-      return res.data;
+      return res.data.data;
     } catch (err) {
       return thunkAPI.rejectWithValue(
         err.response?.data?.message || "Failed to fetch recommended jobs",
@@ -103,6 +117,7 @@ const jobSlice = createSlice({
     total: 0,
     page: 1,
     pages: 1,
+    job: null,
 
     //Recommended Jobs
     recommendedJobs: [],
@@ -148,13 +163,26 @@ const jobSlice = createSlice({
         state.error = action.payload;
       })
 
+      .addCase(getJobById.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(getJobById.fulfilled, (state, action) => {
+        state.loading = false;
+        state.job = action.payload.data;
+      })
+      .addCase(getJobById.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+
       // ================= RECOMMENDED =================
       .addCase(getRecommendedJobs.pending, (state) => {
         state.loading = true;
       })
       .addCase(getRecommendedJobs.fulfilled, (state, action) => {
         state.loading = false;
-        state.recommendedJobs = action.payload.jobs;
+        state.recommendedJobs = action.payload;
       })
       .addCase(getRecommendedJobs.rejected, (state, action) => {
         state.loading = false;

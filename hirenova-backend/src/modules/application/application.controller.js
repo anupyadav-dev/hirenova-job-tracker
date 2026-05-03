@@ -10,26 +10,29 @@ import {
 } from "./application.service.js";
 
 export const applyJob = asyncHandler(async (req, res) => {
-  const app = await applyJobService(req.params.jobId, req.user._id);
+  const app = await applyJobService(req.params.jobId, req.user._id, req.body);
 
   res.status(201).json(new ApiResponse(201, "Applied successfully", app));
 });
 
 export const getMyApplications = asyncHandler(async (req, res) => {
   const apps = await getMyApplicationsService(req.user._id);
-
   res.json(new ApiResponse(200, "Applications fetched", apps));
 });
 
 export const getApplicants = asyncHandler(async (req, res) => {
-  const apps = await getApplicantsService(req.params.jobId, req.user._id);
+  const apps = await getApplicantsService(
+    req.params.jobId,
+    req.user._id,
+    req.query,
+  );
 
   res.json(new ApiResponse(200, "Applicants fetched", apps));
 });
 
 export const updateApplicationStatus = asyncHandler(async (req, res) => {
   const app = await updateApplicationStatusService(
-    req.params.applicationId,
+    req.params.id,
     req.user._id,
     req.body.status,
   );
@@ -38,7 +41,6 @@ export const updateApplicationStatus = asyncHandler(async (req, res) => {
 });
 
 export const withdrawApplication = asyncHandler(async (req, res) => {
-  await withdrawApplicationService(req.params.applicationId, req.user._id);
-
+  await withdrawApplicationService(req.params.id, req.user._id);
   res.json(new ApiResponse(200, "Application withdrawn"));
 });

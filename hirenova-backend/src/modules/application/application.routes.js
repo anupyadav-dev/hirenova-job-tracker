@@ -11,21 +11,15 @@ import { protect, authorize } from "../../middlewares/auth.middleware.js";
 
 const router = express.Router();
 
-router.post("/apply/:jobId", protect, authorize("user"), applyJob);
+//  user routes
+router.post("/:jobId/apply", protect, authorize("user"), applyJob);
+router.get("/my", protect, authorize("user"), getMyApplications);
+router.delete("/:id", protect, authorize("user"), withdrawApplication);
 
-router.get("/my-applications", protect, authorize("user"), getMyApplications);
-
-router.delete(
-  "/:applicationId",
-  protect,
-  authorize("user"),
-  withdrawApplication,
-);
-
+//  recruiter routes
 router.get("/job/:jobId", protect, authorize("recruiter"), getApplicants);
-
 router.patch(
-  "/:applicationId/status",
+  "/:id/status",
   protect,
   authorize("recruiter"),
   updateApplicationStatus,

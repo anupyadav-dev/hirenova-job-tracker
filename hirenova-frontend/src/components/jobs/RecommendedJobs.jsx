@@ -26,10 +26,9 @@ const RecommendedJobs = () => {
     dispatch(getRecommendedJobs());
   }, [dispatch]);
 
+  if (loading.recommended) return <Loader />;
 
-  if (loading) return <Loader />;
-
-  if (error) {
+  if (error.recommended) {
     return <ErrorState message="Failed to load recommendations" />;
   }
 

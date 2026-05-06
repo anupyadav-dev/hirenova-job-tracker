@@ -1,13 +1,12 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 import { getJobs } from "../../features/jobs/jobSlice";
-import useDebounce from "../../hooks/useDebounce";
-
-import SearchBar from "../../components/jobs/SearchBar";
 import JobList from "../../components/jobs/JobList";
 import Pagination from "../../components/jobs/Pagination";
+import SearchBar from "../../components/jobs/SearchBar";
+import FilterChips from "../../components/jobs/FilterChips";
 
 import Loader from "../../components/common/Loader";
 import ErrorState from "../../components/common/ErrorState";
@@ -15,64 +14,77 @@ import EmptyState from "../../components/common/EmptyState";
 import JobActions from "../../components/jobs/JobActions";
 
 const Jobs = () => {
-  const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { jobs, loading, total, page, pages, error } = useSelector(
+  const navigate = useNavigate();
+
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const { jobs, total, page, pages, loading, error } = useSelector(
     (state) => state.jobs,
   );
 
   const { user } = useSelector((state) => state.auth);
   const role = user?.role || "guest";
 
-  const [keyword, setKeyword] = useState("");
-  const [location, setLocation] = useState("");
+  // 🔥 Read from URL
+  const filters = {
+    keyword: searchParams.get("keyword") || "",
+    location: searchParams.get("location") || "",
+    jobType: searchParams.get("jobType") || "",
+    category: searchParams.get("category") || "",
+    minSalary: searchParams.get("minSalary") || "",
+    maxSalary: searchParams.get("maxSalary") || "",
+    experience: searchParams.get("experience") || "",
+    sort: searchParams.get("sort") || "latest",
+    page: Number(searchParams.get("page")) || 1,
+  };
 
-  const debouncedKeyword = useDebounce(keyword, 500);
-  const debouncedLocation = useDebounce(location, 500);
-
+  // 🔥 API call
   useEffect(() => {
-    dispatch(
-      getJobs({ keyword: debouncedKeyword, location: debouncedLocation, page }),
-    );
-  }, [dispatch, debouncedKeyword, debouncedLocation, page]);
+    dispatch(getJobs(filters));
+  }, [dispatch, searchParams.toString()]);
 
-  if (error) return <ErrorState message={error} />;
+  // 🔥 Update URL
+  const updateFilters = (newFilters) => {
+    setSearchParams({
+      ...filters,
+      ...newFilters,
+      page: 1, // reset page
+    });
+  };
+
+  if (error.jobs) return <ErrorState message={error.jobs} />;
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">Find Jobs</h1>
-      <p className="text-sm text-gray-500 mb-4">{total} jobs found</p>
+    <div className="p-6 space-y-6">
+      <h1 className="text-2xl font-bold">Find Jobs</h1>
 
-      <SearchBar
-        keyword={keyword}
-        setKeyword={setKeyword}
-        location={location}
-        setLocation={setLocation}
-      />
+      <SearchBar filters={filters} setFilters={updateFilters} />
 
-      {loading ? (
+      <FilterChips filters={filters} setFilters={updateFilters} />
+
+      {loading.jobs ? (
         <Loader />
+      ) : jobs.length === 0 ? (
+        <EmptyState message="No jobs found" />
       ) : (
         <>
-          {jobs && jobs.length > 0 ? (
-            <>
-              <JobList
-                jobs={jobs}
-                role={role}
-                onJobClick={(job) => navigate(`/jobs/${job._id}`)}
-                renderActions={(job) => <JobActions role={role} job={job} />}
-              />
-              <Pagination
-                page={page}
-                pages={pages}
-                onPageChange={(newPage) =>
-                  dispatch(getJobs({ keyword, location, page: newPage }))
-                }
-              />
-            </>
-          ) : (
-            <EmptyState message="No jobs found" />
-          )}
+          <JobList
+            jobs={jobs}
+            role={role}
+            onJobClick={(job) => navigate(`/jobs/${job._id}`)}
+            renderActions={(job) => (
+              <JobActions role={role} job={job} navigate={navigate} />
+            )}
+          />
+
+          <Pagination
+            page={page}
+            pages={pages}
+            onPageChange={(newPage) =>
+              setSearchParams({ ...filters, page: newPage })
+            }
+          />
         </>
       )}
     </div>

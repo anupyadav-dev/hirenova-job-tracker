@@ -64,13 +64,28 @@ export const getJobByIdService = async (jobId) => {
   return job;
 };
 
-export const getAllJobsService = async (query) => {
-  const { keyword, location, jobType, category, page = 1, limit = 6 } = query;
+export const getAllJobsService = async (query, userId) => {
+  const {
+    keyword,
+    location,
+    jobType,
+    category,
+    minSalary,
+    maxSalary,
+    experience,
+    sort = "latest",
+    page = 1,
+    limit = 6,
+  } = query;
 
   let filter = { status: "active" };
 
   if (keyword) {
-    filter.title = { $regex: keyword, $options: "i" };
+    filter.$or = [
+      { title: { $regex: keyword, $options: "i" } },
+      { skills: { $regex: keyword, $options: "i" } },
+      { company: { $regex: keyword, $options: "i" } },
+    ];
   }
 
   if (location) {
@@ -80,23 +95,48 @@ export const getAllJobsService = async (query) => {
   if (jobType) filter.jobType = jobType;
   if (category) filter.category = category;
 
-  const skip = (page - 1) * limit;
+  if (minSalary || maxSalary) {
+    filter.salary = {};
+    if (minSalary) filter.salary.$gte = Number(minSalary);
+    if (maxSalary) filter.salary.$lte = Number(maxSalary);
+  }
+
+  if (experience) {
+    filter["experience.min"] = { $lte: Number(experience) };
+    filter["experience.max"] = { $gte: Number(experience) };
+  }
+
+  if (userId) {
+    const applications = await Application.find({ applicant: userId }).select(
+      "job",
+    );
+    const appliedIds = applications.map((a) => a.job);
+    filter._id = { $nin: appliedIds };
+  }
+
+  let sortOption = { createdAt: -1 };
+  if (sort === "salary") sortOption = { salary: -1 };
+  if (sort === "oldest") sortOption = { createdAt: 1 };
+
+  const safePage = Math.max(1, Number(page));
+  const safeLimit = Math.max(1, Number(limit));
+
+  const skip = (safePage - 1) * safeLimit;
 
   const jobs = await Job.find(filter)
-    .sort({ createdAt: -1 })
+    .sort(sortOption)
     .skip(skip)
-    .limit(Number(limit));
+    .limit(safeLimit);
 
   const total = await Job.countDocuments(filter);
 
   return {
     jobs,
     total,
-    page: Number(page),
-    pages: Math.ceil(total / limit),
+    page: safePage,
+    pages: Math.ceil(total / safeLimit),
   };
 };
-
 export const getLatestJobsService = async () => {
   return await Job.find({ status: "active" }).sort({ createdAt: -1 }).limit(6);
 };

@@ -18,7 +18,7 @@ const Applicants = () => {
   const dispatch = useDispatch();
 
   const { applicants, loading, error } = useSelector(
-    (state) => state.applications
+    (state) => state.applications,
   );
 
   useEffect(() => {
@@ -32,10 +32,11 @@ const Applicants = () => {
   };
 
   // 🔹 Loading
-  if (loading) return <Loader />;
+  if (loading.applicants) return <Loader />;
 
   // 🔹 Error
-  if (error) return <ErrorState message="Failed to load applicants" />;
+  if (error.applicants)
+    return <ErrorState message="Failed to load applicants" />;
 
   // 🔹 Empty
   if (!applicants || applicants.length === 0) {

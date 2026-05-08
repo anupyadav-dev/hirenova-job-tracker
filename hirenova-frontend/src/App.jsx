@@ -9,16 +9,17 @@ function App() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { user } = useSelector((state) => state.auth);
+  const { applications } = useSelector((state) => state.applications);
 
   useEffect(() => {
     dispatch(loadUser());
   }, [dispatch]);
 
   useEffect(() => {
-    if (user?.role === "user") {
+    if (user?.role === "user" && applications.length === 0) {
       dispatch(getMyApplications());
     }
-  }, [user]);
+  }, [user, applications.length, dispatch]);
 
   useEffect(() => {
     const handleLogout = () => {

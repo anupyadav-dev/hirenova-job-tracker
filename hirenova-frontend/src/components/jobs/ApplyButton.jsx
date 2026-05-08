@@ -1,37 +1,23 @@
 import { useDispatch, useSelector } from "react-redux";
-import {
-  applyJob,
-  getMyApplications,
-} from "../../features/applications/applicationSlice";
+import { applyJob } from "../../features/applications/applicationSlice";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
 
 const ApplyButton = ({ jobId }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const { user } = useSelector((state) => state.auth);
-  const { applications = [], applying } = useSelector(
+  const { appliedJobIds = [], loading } = useSelector(
     (state) => state.applications,
   );
 
-  console.log("applications", applications);
-  console.log("jobId", jobId);
-
-  const [localLoading, setLocalLoading] = useState(false);
-
-  const applied = applications.some((app) => {
-    const appJobId =
-      app.job?._id?.toString() || app.job?.toString() || app.jobId?.toString();
-
-    return appJobId === jobId.toString();
-  });
-
   const isGuest = !user;
-  const isLoading = applying || localLoading;
-  const isDisabled = applied || isLoading;
-  const isDisabledFinal = isGuest ? false : isDisabled;
+  const isLoading = loading.action;
+
+  const applied = appliedJobIds.includes(jobId);
+
+  const isDisabled = isGuest ? false : applied || isLoading;
 
   const handleApply = async () => {
     if (isGuest) {
@@ -44,18 +30,10 @@ const ApplyButton = ({ jobId }) => {
     if (isDisabled) return;
 
     try {
-      setLocalLoading(true);
-
-      await dispatch(applyJob(jobId)).unwrap();
-
+      await dispatch(applyJob({ jobId })).unwrap();
       toast.success("Applied successfully 🚀");
-
-      // background sync
-      dispatch(getMyApplications());
     } catch (err) {
       toast.error(err || "Failed to apply");
-    } finally {
-      setLocalLoading(false);
     }
   };
 
@@ -64,13 +42,13 @@ const ApplyButton = ({ jobId }) => {
     : isLoading
       ? "Applying..."
       : applied
-        ? "Already Applied"
+        ? "Applied"
         : "Apply Now";
 
   return (
     <button
       onClick={handleApply}
-      disabled={isDisabledFinal}
+      disabled={isDisabled}
       className={`px-5 py-2 rounded font-medium text-white transition-all duration-200
         ${
           applied

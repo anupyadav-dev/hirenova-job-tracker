@@ -118,7 +118,7 @@ const MyJobs = () => {
         ))}
       </div>
 
-      {loading ? (
+      {loading.myJobs ? (
         <Loader />
       ) : !myJobs || myJobs.length === 0 ? (
         <EmptyState message="No jobs found" />

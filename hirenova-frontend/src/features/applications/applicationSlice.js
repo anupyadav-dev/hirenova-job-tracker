@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "../../api/axios";
+import { act } from "react";
 
 // ================= USER =================
 
@@ -180,6 +181,7 @@ const applicationSlice = createSlice({
         state.loading.applicants = true;
       })
       .addCase(getApplicants.fulfilled, (state, action) => {
+        console.log(action.payload);
         state.loading.applicants = false;
         state.applicants = action.payload;
       })

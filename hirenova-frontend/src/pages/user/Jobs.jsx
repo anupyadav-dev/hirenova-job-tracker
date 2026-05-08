@@ -1,8 +1,10 @@
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
 import { getJobs } from "../../features/jobs/jobSlice";
+import useDebounce from "../../hooks/useDebounce";
+
 import JobList from "../../components/jobs/JobList";
 import Pagination from "../../components/jobs/Pagination";
 import SearchBar from "../../components/jobs/SearchBar";
@@ -19,50 +21,126 @@ const Jobs = () => {
 
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const { jobs, total, page, pages, loading, error } = useSelector(
+  const { jobs, total, pages, loading, error } = useSelector(
     (state) => state.jobs,
   );
 
   const { user } = useSelector((state) => state.auth);
   const role = user?.role || "guest";
 
-  // 🔥 Read from URL
-  const filters = {
-    keyword: searchParams.get("keyword") || "",
-    location: searchParams.get("location") || "",
-    jobType: searchParams.get("jobType") || "",
-    category: searchParams.get("category") || "",
-    minSalary: searchParams.get("minSalary") || "",
-    maxSalary: searchParams.get("maxSalary") || "",
-    experience: searchParams.get("experience") || "",
-    sort: searchParams.get("sort") || "latest",
-    page: Number(searchParams.get("page")) || 1,
-  };
+  // ================= READ FROM URL =================
+  const keyword = searchParams.get("keyword") || "";
+  const location = searchParams.get("location") || "";
+  const jobType = searchParams.get("jobType") || "";
+  const category = searchParams.get("category") || "";
+  const minSalary = searchParams.get("minSalary") || "";
+  const maxSalary = searchParams.get("maxSalary") || "";
+  const experience = searchParams.get("experience") || "";
+  const sort = searchParams.get("sort") || "latest";
+  const currentPage = Number(searchParams.get("page")) || 1;
 
-  // 🔥 API call
+  // ================= DEBOUNCE =================
+  const debouncedKeyword = useDebounce(keyword, 500);
+  const debouncedLocation = useDebounce(location, 500);
+
+  // ================= MEMO FILTERS =================
+  const finalFilters = useMemo(() => {
+    return {
+      keyword: debouncedKeyword,
+      location: debouncedLocation,
+      jobType,
+      category,
+      minSalary,
+      maxSalary,
+      experience,
+      sort,
+      page: currentPage,
+    };
+  }, [
+    debouncedKeyword,
+    debouncedLocation,
+    jobType,
+    category,
+    minSalary,
+    maxSalary,
+    experience,
+    sort,
+    currentPage,
+  ]);
+
+  // ================= API CALL =================
   useEffect(() => {
-    dispatch(getJobs(filters));
-  }, [dispatch, searchParams.toString()]);
+    dispatch(getJobs(finalFilters));
+  }, [dispatch, finalFilters]);
 
-  // 🔥 Update URL
+  // ================= UPDATE URL =================
   const updateFilters = (newFilters) => {
-    setSearchParams({
-      ...filters,
+    const updated = {
+      keyword,
+      location,
+      jobType,
+      category,
+      minSalary,
+      maxSalary,
+      experience,
+      sort,
+      page: 1,
       ...newFilters,
-      page: 1, // reset page
-    });
+    };
+
+    const clean = Object.fromEntries(
+      Object.entries(updated).filter(
+        ([, value]) => value !== "" && value !== null,
+      ),
+    );
+
+    setSearchParams(clean);
   };
 
-  if (error.jobs) return <ErrorState message={error.jobs} />;
+  // ================= ERROR =================
+  if (error?.jobs) {
+    return <ErrorState message={error.jobs} />;
+  }
 
   return (
     <div className="p-6 space-y-6">
-      <h1 className="text-2xl font-bold">Find Jobs</h1>
+      {/* HEADER */}
+      <div>
+        <h1 className="text-2xl font-bold">Find Jobs</h1>
+        <p className="text-sm text-gray-500 mt-1">{total} jobs found</p>
+      </div>
 
-      <SearchBar filters={filters} setFilters={updateFilters} />
+      {/* SEARCH */}
+      <SearchBar
+        filters={{
+          keyword,
+          location,
+          jobType,
+          category,
+          minSalary,
+          maxSalary,
+          experience,
+          sort,
+        }}
+        setFilters={updateFilters}
+      />
 
-      <FilterChips filters={filters} setFilters={updateFilters} />
+      {/* FILTER CHIPS */}
+      <FilterChips
+        filters={{
+          keyword,
+          location,
+          jobType,
+          category,
+          minSalary,
+          maxSalary,
+          experience,
+          sort,
+        }}
+        setFilters={updateFilters}
+      />
 
+      {/* JOB LIST */}
       {loading.jobs ? (
         <Loader />
       ) : jobs.length === 0 ? (
@@ -78,12 +156,25 @@ const Jobs = () => {
             )}
           />
 
+          {/* PAGINATION */}
           <Pagination
-            page={page}
+            page={currentPage}
             pages={pages}
-            onPageChange={(newPage) =>
-              setSearchParams({ ...filters, page: newPage })
-            }
+            onPageChange={(newPage) => {
+              setSearchParams({
+                keyword,
+                location,
+                jobType,
+                category,
+                minSalary,
+                maxSalary,
+                experience,
+                sort,
+                page: newPage,
+              });
+
+              window.scrollTo({ top: 0, behavior: "smooth" });
+            }}
           />
         </>
       )}

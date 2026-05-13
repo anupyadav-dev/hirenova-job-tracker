@@ -1,5 +1,5 @@
 import type { Request, RequestHandler } from "express";
-import jwt, { JsonWebTokenError, TokenExpiredError } from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 
 import { env } from "../config/env.js";
 import User from "../modules/user/user.model.js";
@@ -39,10 +39,10 @@ export const protect: RequestHandler = asyncHandler(async (req, _res, next) => {
     // (token.util.ts) to always include id+role — assert that contract here.
     payload = jwt.verify(token, env.JWT_SECRET) as JwtUserPayload;
   } catch (err: unknown) {
-    if (err instanceof TokenExpiredError) {
+    if (err instanceof jwt.TokenExpiredError) {
       throw new ApiError(401, "Token expired");
     }
-    if (err instanceof JsonWebTokenError) {
+    if (err instanceof jwt.JsonWebTokenError) {
       throw new ApiError(401, "Invalid token");
     }
     // Unknown error during JWT verification — surface as 401 rather than 500.

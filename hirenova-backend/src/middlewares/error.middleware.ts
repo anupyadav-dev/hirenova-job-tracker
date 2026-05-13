@@ -1,7 +1,7 @@
 import type { ErrorRequestHandler } from "express";
 import mongoose from "mongoose";
 import multer from "multer";
-import { JsonWebTokenError, TokenExpiredError } from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 
 import { env } from "../config/env.js";
 import { ApiError } from "../utils/apiError.js";
@@ -81,11 +81,11 @@ const errorHandler: ErrorRequestHandler = (err, _req, res, _next) => {
   }
 
   // 5) Stray JWT errors that didn't go through `protect`.
-  if (err instanceof TokenExpiredError) {
+  if (err instanceof jwt.TokenExpiredError) {
     res.status(401).json({ success: false, message: "Token expired" });
     return;
   }
-  if (err instanceof JsonWebTokenError) {
+  if (err instanceof jwt.JsonWebTokenError) {
     res.status(401).json({ success: false, message: "Invalid token" });
     return;
   }

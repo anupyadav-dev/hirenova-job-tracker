@@ -3,10 +3,11 @@ import jwt from "jsonwebtoken";
 
 import { env } from "../config/env.js";
 import User from "../modules/user/user.model.js";
+import type { UserRole } from "../modules/user/user.model.js";
 import type { AuthedUser } from "../types/express.js";
 import { ApiError } from "../utils/apiError.js";
 import { asyncHandler } from "../utils/asyncHandler.util.js";
-import type { JwtUserPayload, UserRole } from "../utils/token.util.js";
+import type { JwtUserPayload } from "../utils/token.util.js";
 
 /**
  * Pulls the JWT from the `token` cookie, falling back to the
@@ -65,8 +66,8 @@ export const protect: RequestHandler = asyncHandler(async (req, _res, next) => {
     id: userDoc._id.toString(),
     email: userDoc.email,
     name: userDoc.name,
-    role: userDoc.role as UserRole,
-    status: userDoc.status as "active" | "blocked",
+    role: userDoc.role,
+    status: userDoc.status,
   };
 
   req.user = authedUser;

@@ -1,11 +1,11 @@
 import jwt, { type Secret, type SignOptions } from "jsonwebtoken";
 
 import { env } from "../config/env.js";
+import type { UserRole } from "../modules/user/user.model.js";
 
-/**
- * Roles allowed on the JWT payload. Mirrors the enum on the User model.
- */
-export type UserRole = "user" | "recruiter" | "admin";
+// Re-export for existing consumers (auth.middleware, express.d.ts).
+// Domain enum lives in user.model.ts; this is just a convenience re-export.
+export type { UserRole };
 
 /**
  * Shape of the payload embedded in every JWT we issue.
@@ -16,8 +16,10 @@ export interface JwtUserPayload {
 }
 
 /**
- * Minimal shape we need from a User to mint a token.
- * Will tighten to `Pick<User, "_id" | "role">` after the User model migrates.
+ * Minimal shape we need from a User to mint a token. Kept as a structural
+ * type rather than `Pick<IUser, "_id" | "role">` because the User model
+ * stores `_id` as ObjectId, which would force consumers of this util
+ * (e.g., callers in tests) to construct ObjectIds. Structural is friendlier.
  */
 interface TokenSubject {
   _id: { toString(): string } | string;

@@ -9,29 +9,19 @@
  * Public routes still see `req.user` as undefined — that's the truth.
  * Protected controllers must narrow with:
  *   if (!req.user) throw new ApiError(401, "Not authenticated");
- *
- * Trade-offs of this module-augmentation approach are documented in
- * docs/migration/PHASE_1.md (or the PR description). The short version:
- *   - Pro: zero boilerplate at every controller.
- *   - Con: every Request type globally gains the field, including in routes
- *     where `protect` never ran. Optional + narrowing keeps us honest.
  */
 
-import type { UserRole } from "../utils/token.util.js";
+import type { IUser } from "../modules/user/user.model.js";
 
 /**
- * Minimal user shape attached to `req.user`. Mirrors what `protect` actually
- * sets — not the full Mongoose document. Will widen to `Pick<User, ...>` once
- * the User model is migrated.
+ * Minimal user shape attached to `req.user`. Derived from IUser via `Pick<>`
+ * so it can never drift from the User model. `_id` is the string form
+ * (Mongoose ObjectId stringified by `protect`) for ergonomic downstream use.
  */
-export interface AuthedUser {
+export type AuthedUser = Pick<IUser, "name" | "email" | "role" | "status"> & {
   _id: string;
   id?: string;
-  email: string;
-  name: string;
-  role: UserRole;
-  status: "active" | "blocked";
-}
+};
 
 declare global {
   namespace Express {
@@ -41,6 +31,5 @@ declare global {
   }
 }
 
-// This file must be a module for `declare global` to work. The empty export
-// is the canonical way to mark a .d.ts as a module.
+// Required for `declare global` to take effect in a module file.
 export {};

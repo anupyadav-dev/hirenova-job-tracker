@@ -1,12 +1,13 @@
-import express from "express";
+import { Router } from "express";
+
+import { authorize, protect } from "../../middlewares/auth.middleware.js";
+
 import {
-  getRecruiterDashboard,
   getAdminDashboard,
+  getRecruiterDashboard,
 } from "./dashboard.controller.js";
 
-import { protect, authorize } from "../../middlewares/auth.middleware.js";
-
-const router = express.Router();
+const router: Router = Router();
 
 router.get(
   "/recruiter",

@@ -4,25 +4,19 @@ import { cookieOptions } from "../../constants/cookieOptions.js";
 import { ApiResponse } from "../../utils/apiResponse.js";
 import { asyncHandler } from "../../utils/asyncHandler.util.js";
 
-import {
-  loginUserService,
-  registerUserService,
-  type LoginInput,
-  type RegisterInput,
-} from "./auth.service.js";
+import { loginUserService, registerUserService } from "./auth.service.js";
+import type { LoginInput, RegisterInput } from "./auth.schemas.js";
 
 /**
- * Access-token cookie lifetime. Mirrors JWT_EXPIRES (default 1d / 24h).
- * Hard-coded here for now; will move into env.ts in a later cleanup.
+ * Access-token cookie lifetime. Mirrors JWT_EXPIRES (default 15 minutes).
  */
 const ACCESS_TOKEN_COOKIE_MAX_AGE_MS = 15 * 60 * 1000;
 
 export const registerController: RequestHandler = asyncHandler(
   async (req, res) => {
-    // Validation middleware has already enforced the RegisterInput shape;
-    // the cast bridges the gap between Express's `any`-typed body and our
-    // typed service contract. (When Zod lands in a later phase, this `as`
-    // becomes a real parse and disappears.)
+    // zodValidate(registerSchema) already ran before this controller.
+    // req.body is now the PARSED value (trimmed, lowercased, defaults applied).
+    // The cast is no longer blind — it is backed by runtime Zod validation.
     const { user } = await registerUserService(req.body as RegisterInput);
 
     res
@@ -40,9 +34,7 @@ export const loginController: RequestHandler = asyncHandler(
       maxAge: ACCESS_TOKEN_COOKIE_MAX_AGE_MS,
     });
 
-    res
-      .status(200)
-      .json(new ApiResponse(200, "User login successfully", user));
+    res.status(200).json(new ApiResponse(200, "User login successfully", user));
   },
 );
 

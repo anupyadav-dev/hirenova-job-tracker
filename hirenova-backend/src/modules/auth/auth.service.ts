@@ -5,25 +5,13 @@ import { generateToken } from "../../utils/token.util.js";
 import User, {
   type IUser,
   type UserDocument,
-  type UserRole,
 } from "../user/user.model.js";
 
-// ─── DTOs ────────────────────────────────────────────────────────────────────
-// Input contracts for this service. Defined locally — co-located with the
-// service that consumes them. A separate dto/ folder is overkill at this size.
-
-export interface RegisterInput {
-  name: string;
-  email: string;
-  password: string;
-  /** Optional: signups default to "user". Admin can never be set via signup. */
-  role?: Exclude<UserRole, "admin">;
-}
-
-export interface LoginInput {
-  email: string;
-  password: string;
-}
+// Types are derived from Zod schemas — single source of truth.
+// Import gives us the names locally; re-export makes them available to callers
+// (e.g. auth.controller.ts) so they don't need a second import path.
+import type { RegisterInput, LoginInput } from "./auth.schemas.js";
+export type { RegisterInput, LoginInput };
 
 // ─── Output type ─────────────────────────────────────────────────────────────
 // Everything that leaves the service: never includes the password hash, and

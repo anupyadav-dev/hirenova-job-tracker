@@ -1,5 +1,7 @@
 import mongoose, { type Types } from "mongoose";
 
+import { calcPages, parsePagination } from "../../shared/helpers/pagination.helper.js";
+import type { PaginatedResult, PaginationQuery } from "../../shared/types/pagination.types.js";
 import { ApiError } from "../../utils/apiError.js";
 import Job from "../job/job.model.js";
 
@@ -17,20 +19,6 @@ export interface ApplyJobData {
     name?: string;
   };
   coverLetter?: string;
-}
-
-export interface GetApplicantsQuery {
-  page?: string | number;
-  limit?: string | number;
-}
-
-// ─── Output shapes ────────────────────────────────────────────────────────────
-
-export interface ApplicantsPage {
-  applications: ApplicationDocument[];
-  total: number;
-  page: number;
-  pages: number;
 }
 
 // ─── Services ─────────────────────────────────────────────────────────────────
@@ -102,10 +90,8 @@ export const getMyApplicationsService = async (userId: string) => {
 export const getApplicantsService = async (
   jobId: string,
   recruiterId: string,
-  query: GetApplicantsQuery,
-): Promise<ApplicantsPage> => {
-  const { page = 1, limit = 10 } = query;
-
+  query: PaginationQuery,
+): Promise<PaginatedResult<ApplicationDocument>> => {
   const job = await Job.findById(jobId);
 
   if (!job) throw new ApiError(404, "Job not found");
@@ -114,25 +100,18 @@ export const getApplicantsService = async (
     throw new ApiError(403, "Not authorized");
   }
 
-  // Convert page/limit to numbers — req.query values arrive as strings.
-  const pageNum = Number(page);
-  const limitNum = Number(limit);
-  const skip = (pageNum - 1) * limitNum;
+  const { pageNum, limitNum, skip } = parsePagination(query, 10);
 
-  const applications = await Application.find({ job: jobId })
-    .populate("applicant", "name email")
-    .sort({ createdAt: -1 })
-    .skip(skip)
-    .limit(limitNum);
+  const [items, total] = await Promise.all([
+    Application.find({ job: jobId })
+      .populate("applicant", "name email")
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limitNum),
+    Application.countDocuments({ job: jobId }),
+  ]);
 
-  const total = await Application.countDocuments({ job: jobId });
-
-  return {
-    applications,
-    total,
-    page: pageNum,
-    pages: Math.ceil(total / limitNum),
-  };
+  return { items, total, page: pageNum, pages: calcPages(total, limitNum) };
 };
 
 export const updateApplicationStatusService = async (

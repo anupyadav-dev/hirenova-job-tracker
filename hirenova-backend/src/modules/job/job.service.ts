@@ -1,5 +1,7 @@
 import type { AnyObject, SortOrder } from "mongoose";
 
+import { parsePagination, calcPages } from "../../shared/helpers/pagination.helper.js";
+import type { PaginatedResult, PaginationQuery } from "../../shared/types/pagination.types.js";
 import { ApiError } from "../../utils/apiError.js";
 import Application from "../application/application.model.js";
 
@@ -26,12 +28,9 @@ export interface CreateJobData {
 
 export type UpdateJobData = Partial<CreateJobData>;
 
-export interface GetMyJobsQuery {
-  page?: string | number;
-  limit?: string | number;
-}
-
-export interface GetAllJobsQuery {
+// PaginationQuery (page/limit) comes from shared/; job-specific filter fields
+// are extended here — adding them to the shared type would couple it to job.
+export interface GetAllJobsQuery extends PaginationQuery {
   keyword?: string;
   location?: string;
   jobType?: string;
@@ -40,17 +39,6 @@ export interface GetAllJobsQuery {
   maxSalary?: string;
   experience?: string;
   sort?: string;
-  page?: string | number;
-  limit?: string | number;
-}
-
-// ─── Output shapes ────────────────────────────────────────────────────────────
-
-export interface JobsPage {
-  jobs: JobDocument[];
-  total: number;
-  page: number;
-  pages: number;
 }
 
 // ─── Services ─────────────────────────────────────────────────────────────────
@@ -64,27 +52,16 @@ export const createJobService = async (
 
 export const getMyJobsService = async (
   userId: string,
-  query: GetMyJobsQuery,
-): Promise<JobsPage> => {
-  const { page = 1, limit = 6 } = query;
+  query: PaginationQuery,
+): Promise<PaginatedResult<JobDocument>> => {
+  const { pageNum, limitNum, skip } = parsePagination(query, 6);
 
-  const pageNum = Number(page);
-  const limitNum = Number(limit);
-  const skip = (pageNum - 1) * limitNum;
+  const [items, total] = await Promise.all([
+    Job.find({ createdBy: userId }).sort({ createdAt: -1 }).skip(skip).limit(limitNum),
+    Job.countDocuments({ createdBy: userId }),
+  ]);
 
-  const jobs = await Job.find({ createdBy: userId })
-    .sort({ createdAt: -1 })
-    .skip(skip)
-    .limit(limitNum);
-
-  const total = await Job.countDocuments({ createdBy: userId });
-
-  return {
-    jobs,
-    total,
-    page: pageNum,
-    pages: Math.ceil(total / limitNum),
-  };
+  return { items, total, page: pageNum, pages: calcPages(total, limitNum) };
 };
 
 export const updateJobService = async (
@@ -138,7 +115,7 @@ export const getAllJobsService = async (
   query: GetAllJobsQuery,
   // Optional: when provided, already-applied jobs are excluded from results.
   userId?: string,
-): Promise<JobsPage> => {
+): Promise<PaginatedResult<JobDocument>> => {
   const {
     keyword,
     location,
@@ -148,8 +125,6 @@ export const getAllJobsService = async (
     maxSalary,
     experience,
     sort = "latest",
-    page = 1,
-    limit = 6,
   } = query;
 
   // AnyObject is Mongoose 9's exported type for loose filter objects.
@@ -204,23 +179,14 @@ export const getAllJobsService = async (
   if (sort === "salary") sortOption = { salary: -1 };
   if (sort === "oldest") sortOption = { createdAt: 1 };
 
-  const safePage = Math.max(1, Number(page));
-  const safeLimit = Math.max(1, Number(limit));
-  const skip = (safePage - 1) * safeLimit;
+  const { pageNum, limitNum, skip } = parsePagination(query, 6);
 
-  const jobs = await Job.find(filter)
-    .sort(sortOption)
-    .skip(skip)
-    .limit(safeLimit);
+  const [items, total] = await Promise.all([
+    Job.find(filter).sort(sortOption).skip(skip).limit(limitNum),
+    Job.countDocuments(filter),
+  ]);
 
-  const total = await Job.countDocuments(filter);
-
-  return {
-    jobs,
-    total,
-    page: safePage,
-    pages: Math.ceil(total / safeLimit),
-  };
+  return { items, total, page: pageNum, pages: calcPages(total, limitNum) };
 };
 
 export const getLatestJobsService = async (): Promise<JobDocument[]> => {

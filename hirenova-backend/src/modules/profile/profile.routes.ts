@@ -3,7 +3,7 @@ import { Router } from "express";
 import { avatarUpload } from "../../middlewares/avatarUpload.middleware.js";
 import { resumeUpload } from "../../middlewares/resumeUpload.middleware.js";
 import { protect } from "../../middlewares/auth.middleware.js";
-import { validate } from "../../middlewares/validation.middleware.js";
+import { zodValidate } from "../../shared/validators/validate.middleware.js";
 
 import {
   createMyProfileController,
@@ -15,15 +15,15 @@ import {
   uploadAvatarController,
   uploadResumeController,
 } from "./profile.controller.js";
-import { profileValidation } from "./profile.validation.js";
+import { profileSchema } from "./profile.schemas.js";
 
 const router: Router = Router();
 
 router.get("/me", protect, getProfileController);
 
-router.post("/", protect, profileValidation, validate, createMyProfileController);
+router.post("/", protect, zodValidate(profileSchema), createMyProfileController);
 
-router.put("/me", protect, profileValidation, validate, updateMyProfileController);
+router.put("/me", protect, zodValidate(profileSchema), updateMyProfileController);
 
 router.patch("/me/resume", protect, resumeUpload.single("resume"), uploadResumeController);
 

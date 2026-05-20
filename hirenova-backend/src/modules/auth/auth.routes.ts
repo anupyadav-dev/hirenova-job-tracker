@@ -1,20 +1,19 @@
-import express from "express";
-
-import {
-  registerController,
-  loginController,
-  logoutController,
-} from "./auth.controller.js";
-
-import { validate } from "../../middlewares/validation.middleware.js";
-import { registerValidation, loginValidation } from "./auth.validation.js";
+import { Router } from "express";
 
 import {
   loginLimiter,
   registerLimiter,
 } from "../../middlewares/rateLimiter/authLimiter.js";
+import { validate } from "../../middlewares/validation.middleware.js";
 
-const router = express.Router();
+import {
+  loginController,
+  logoutController,
+  registerController,
+} from "./auth.controller.js";
+import { loginValidation, registerValidation } from "./auth.validation.js";
+
+const router: Router = Router();
 
 router.post(
   "/register",

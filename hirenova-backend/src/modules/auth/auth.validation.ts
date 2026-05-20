@@ -1,6 +1,6 @@
-import { body } from "express-validator";
+import { body, type ValidationChain } from "express-validator";
 
-export const registerValidation = [
+export const registerValidation: ValidationChain[] = [
   body("name")
     .notEmpty()
     .withMessage("Name is required")
@@ -24,7 +24,7 @@ export const registerValidation = [
     .withMessage("Invalid role"),
 ];
 
-export const loginValidation = [
+export const loginValidation: ValidationChain[] = [
   body("email").isEmail().withMessage("Valid email required").normalizeEmail(),
 
   body("password").notEmpty().withMessage("Password is required"),

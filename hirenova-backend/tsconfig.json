@@ -31,9 +31,8 @@
     "noImplicitOverride": true,
     "noFallthroughCasesInSwitch": true,
 
-    /* ─── Migration helpers (temporary; removed after Step 8) ─── */
-    "allowJs": true,
-    "checkJs": false,
+    /* ─── Library checking ─── */
+    "allowJs": false,
     "skipLibCheck": true,
 
     /* ─── Path aliases (TS 6+ resolves relative to this tsconfig) ─── */

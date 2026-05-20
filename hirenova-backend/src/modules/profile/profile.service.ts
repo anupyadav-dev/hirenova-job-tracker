@@ -2,38 +2,17 @@ import { ApiError } from "../../utils/apiError.js";
 
 import { Profile } from "./profile.model.js";
 import type { ProfileDocument } from "./profile.model.js";
+import type { ProfileInput } from "./profile.schemas.js";
 
-// ─── Input shapes ─────────────────────────────────────────────────────────────
+// Re-export so profile.controller.ts imports from one place.
+export type { ProfileInput };
 
-export interface CreateProfileData {
-  bio?: string;
-  experience?: string;
-  phone?: string;
-  // Skills may arrive as a comma-separated string or a proper array
-  // depending on the client. normalizeSkills handles both forms.
-  skills?: string | string[];
-}
-
-export type UpdateProfileData = Partial<CreateProfileData>;
-
-// ─── Helpers ─────────────────────────────────────────────────────────────────
-
-const normalizeSkills = (
-  skills: string | string[] | undefined | null,
-): string[] => {
-  if (!skills) return [];
-
-  if (Array.isArray(skills)) return skills;
-
-  if (typeof skills === "string") {
-    return skills
-      .split(",")
-      .map((item) => item.trim())
-      .filter(Boolean);
-  }
-
-  return [];
-};
+// NOTE: normalizeSkills was removed here.
+// Previously it converted "react,node" → ["react","node"] inside the service.
+// Now zodValidate(profileSchema) runs at the route level and performs the same
+// split via the z.union transform. By the time any service function is called,
+// skills is always string[] (or undefined). Keeping the normalization in two
+// places would be confusing — the route layer is the correct boundary for it.
 
 // ─── Services ─────────────────────────────────────────────────────────────────
 
@@ -53,7 +32,7 @@ export const getProfileService = async (
 
 export const createProfileService = async (
   userId: string,
-  data: CreateProfileData,
+  data: ProfileInput,
 ): Promise<ProfileDocument> => {
   const existing = await Profile.findOne({ user: userId });
 
@@ -66,7 +45,9 @@ export const createProfileService = async (
     bio: data.bio ?? "",
     experience: data.experience ?? "",
     phone: data.phone ?? "",
-    skills: normalizeSkills(data.skills),
+    // skills is always string[] here — Zod's union transform already
+    // converted any comma-separated string before this point.
+    skills: data.skills ?? [],
   });
 
   return profile;
@@ -74,7 +55,7 @@ export const createProfileService = async (
 
 export const updateProfileService = async (
   userId: string,
-  data: UpdateProfileData,
+  data: ProfileInput,
 ): Promise<ProfileDocument> => {
   const profile = await Profile.findOne({ user: userId });
 
@@ -86,7 +67,8 @@ export const updateProfileService = async (
   if (data.phone !== undefined) profile.phone = data.phone;
   if (data.experience !== undefined) profile.experience = data.experience;
   if (data.skills !== undefined) {
-    profile.skills = normalizeSkills(data.skills);
+    // Already string[] — no further normalization needed.
+    profile.skills = data.skills;
   }
 
   await profile.save();

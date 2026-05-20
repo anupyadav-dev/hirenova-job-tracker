@@ -6,45 +6,18 @@ import { ApiError } from "../../utils/apiError.js";
 import Application from "../application/application.model.js";
 
 import Job from "./job.model.js";
+import type { JobDocument } from "./job.model.js";
 import type {
-  JobCategory,
-  JobDocument,
-  JobType,
-} from "./job.model.js";
+  CreateJobInput,
+  UpdateJobInput,
+  GetAllJobsInput,
+} from "./job.schemas.js";
 
-// ─── Input shapes ─────────────────────────────────────────────────────────────
-
-export interface CreateJobData {
-  title: string;
-  description: string;
-  company: string;
-  location: string;
-  salary?: number;
-  jobType?: JobType;
-  skills?: string[];
-  category?: JobCategory;
-  experience?: { min?: number; max?: number };
-}
-
-export type UpdateJobData = Partial<CreateJobData>;
-
-// PaginationQuery (page/limit) comes from shared/; job-specific filter fields
-// are extended here — adding them to the shared type would couple it to job.
-export interface GetAllJobsQuery extends PaginationQuery {
-  keyword?: string;
-  location?: string;
-  jobType?: string;
-  category?: string;
-  minSalary?: string;
-  maxSalary?: string;
-  experience?: string;
-  sort?: string;
-}
 
 // ─── Services ─────────────────────────────────────────────────────────────────
 
 export const createJobService = async (
-  data: CreateJobData,
+  data: CreateJobInput,
   userId: string,
 ): Promise<JobDocument> => {
   return Job.create({ ...data, createdBy: userId });
@@ -67,7 +40,7 @@ export const getMyJobsService = async (
 export const updateJobService = async (
   jobId: string,
   userId: string,
-  data: UpdateJobData,
+  data: UpdateJobInput,
 ): Promise<JobDocument> => {
   const job = await Job.findById(jobId);
 
@@ -112,7 +85,7 @@ export const getJobByIdService = async (
 };
 
 export const getAllJobsService = async (
-  query: GetAllJobsQuery,
+  query: GetAllJobsInput,
   // Optional: when provided, already-applied jobs are excluded from results.
   userId?: string,
 ): Promise<PaginatedResult<JobDocument>> => {
@@ -124,8 +97,9 @@ export const getAllJobsService = async (
     minSalary,
     maxSalary,
     experience,
-    sort = "latest",
+    sort,
   } = query;
+  // sort always has a value — Zod schema defaults to "latest"
 
   // AnyObject is Mongoose 9's exported type for loose filter objects.
   // Mongoose 9 removed FilterQuery; QueryFilter is internal. AnyObject lets
@@ -145,25 +119,27 @@ export const getAllJobsService = async (
     filter.location = { $regex: location, $options: "i" };
   }
 
-  // Values arrive as plain strings from req.query; cast to the schema enum
-  // type — invalid values will simply return no results (Mongo filter miss).
-  if (jobType) filter.jobType = jobType as JobType;
-  if (category) filter.category = category as JobCategory;
+  // jobType and category arrive as their enum literal types from Zod (not raw
+  // strings), so no cast needed. Invalid values are rejected at the route level.
+  if (jobType) filter.jobType = jobType;
+  if (category) filter.category = category;
 
-  if (minSalary || maxSalary) {
+  // minSalary / maxSalary are already coerced to numbers by Zod (z.coerce.number).
+  // Use !== undefined instead of truthiness to preserve a hypothetical $0 filter.
+  if (minSalary !== undefined || maxSalary !== undefined) {
     const salaryFilter: { $gte?: number; $lte?: number } = {};
-    if (minSalary) salaryFilter.$gte = Number(minSalary);
-    if (maxSalary) salaryFilter.$lte = Number(maxSalary);
+    if (minSalary !== undefined) salaryFilter.$gte = minSalary;
+    if (maxSalary !== undefined) salaryFilter.$lte = maxSalary;
     filter.salary = salaryFilter;
   }
 
-  if (experience) {
+  if (experience !== undefined) {
     // Dot-notation keys are valid MongoDB but not part of IJob's TypeScript
     // interface. Object.assign bypasses the strict key check; behaviour is
-    // identical to the original JS code.
+    // identical to the original JS code. experience is a coerced number.
     Object.assign(filter, {
-      "experience.min": { $lte: Number(experience) },
-      "experience.max": { $gte: Number(experience) },
+      "experience.min": { $lte: experience },
+      "experience.max": { $gte: experience },
     });
   }
 

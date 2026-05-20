@@ -9,8 +9,7 @@ import {
   createProfileService,
   getProfileService,
   updateProfileService,
-  type CreateProfileData,
-  type UpdateProfileData,
+  type ProfileInput,
 } from "./profile.service.js";
 import {
   deleteAvatarService,
@@ -47,7 +46,7 @@ export const createMyProfileController: RequestHandler = asyncHandler(
 
     const profile = await createProfileService(
       req.user._id,
-      req.body as CreateProfileData,
+      req.body as ProfileInput,
     );
 
     return res
@@ -64,7 +63,7 @@ export const updateMyProfileController: RequestHandler = asyncHandler(
 
     const profile = await updateProfileService(
       req.user._id,
-      req.body as UpdateProfileData,
+      req.body as ProfileInput,
     );
 
     return res

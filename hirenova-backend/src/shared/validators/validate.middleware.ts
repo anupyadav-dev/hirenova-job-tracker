@@ -3,7 +3,7 @@
  *
  * PROBLEM WITH THE OLD APPROACH:
  *   express-validator validates req.body but doesn't change its type.
- *   The controller still had to do `req.body as CreateJobData` — a blind cast.
+ *   The controller still had to do `req.body as CreateJobInput` — a blind cast.
  *   If validation missed a field, TypeScript had no idea.
  *
  * HOW ZOD FIXES THIS:

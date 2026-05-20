@@ -1,6 +1,6 @@
 import type { RequestHandler } from "express";
 
-import { cookieOptions } from "../../constants/cookieOptions.js";
+import { cookieOptions } from "../../config/cookieOptions.js";
 import { ApiResponse } from "../../utils/apiResponse.js";
 import { asyncHandler } from "../../utils/asyncHandler.util.js";
 

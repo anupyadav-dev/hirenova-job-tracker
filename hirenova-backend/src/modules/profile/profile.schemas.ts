@@ -1,12 +1,9 @@
 /**
  * Profile module — Zod schemas.
  *
- * The old profile.validation.ts used express-validator with a custom()
- * validator for the skills field. Zod's z.union() handles this cleanly:
- *   - string: "React, Node, TypeScript"
- *   - array: ["React", "Node", "TypeScript"]
- *
- * Notice how much simpler the Zod version is vs the custom() callback.
+ * skills accepts both formats via z.union():
+ *   - comma string: "React, Node, TypeScript" → transformed to string[]
+ *   - array: ["React", "Node", "TypeScript"]  → passed through as-is
  */
 
 import { z } from "zod";

@@ -1,6 +1,5 @@
 /**
  * Job module — Zod schemas.
- * Replaces job.validation.ts (express-validator chains).
  */
 
 import { z } from "zod";
